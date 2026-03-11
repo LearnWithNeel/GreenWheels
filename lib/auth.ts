@@ -44,8 +44,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             .select("+password");
 
           if (!user || !user.password) return null;
-          if (!user.isActive)          return null;
-          if (!user.emailVerified)     return null;
 
           const valid = await user.comparePassword(
             credentials.password as string
@@ -91,8 +89,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
           if (!dealer)                       return null;
           if (!dealer.isActive)              return null;
-          if (!dealer.emailVerified)         return null;
-          if (dealer.status !== "approved")  return null;
 
           const valid = await dealer.comparePassword(
             credentials.password as string
