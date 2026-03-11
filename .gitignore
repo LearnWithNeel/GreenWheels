@@ -1,0 +1,26 @@
+# Environment — NEVER commit
+.env
+.env.local
+.env.*.local
+
+# Next.js
+.next/
+out/
+
+# Node
+node_modules/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/settings.json
+.idea/
+
+# Vercel
+.vercel

@@ -1,0 +1,87 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap');
+
+:root {
+  --font-body:    'Outfit', sans-serif;
+  --font-display: 'Outfit', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin:     0;
+  padding:    0;
+}
+
+body {
+  background: #021a08;
+  color:      #e2e8f0;
+  font-family: var(--font-body);
+  -webkit-font-smoothing:  antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar       { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: #052e16; }
+::-webkit-scrollbar-thumb { background: #15803d; border-radius: 4px; }
+
+/* Reusable component classes */
+@layer components {
+
+  .btn-primary {
+    @apply bg-lime-400 text-gw-950 font-bold px-6 py-3 rounded-xl
+           hover:bg-lime-300 transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply border border-gw-700 text-gw-400 font-semibold px-6 py-3 rounded-xl
+           hover:bg-gw-900 transition-all duration-200;
+  }
+
+  .btn-danger {
+    @apply bg-red-500 text-white font-bold px-6 py-3 rounded-xl
+           hover:bg-red-400 transition-all duration-200;
+  }
+
+  .card {
+    @apply bg-gw-900 border border-gw-800 rounded-2xl p-5;
+  }
+
+  .input {
+    @apply w-full bg-gw-950 border border-gw-800 text-gw-200
+           rounded-xl px-4 py-3 text-sm outline-none
+           focus:border-gw-600 focus:ring-1 focus:ring-gw-600
+           placeholder:text-gw-700 transition-all duration-200;
+  }
+
+  .label {
+    @apply block text-sm font-semibold text-gw-300 mb-1;
+  }
+
+  .badge-green {
+    @apply text-xs font-bold bg-gw-900 text-gw-400
+           border border-gw-700 rounded-full px-3 py-1;
+  }
+
+  .badge-yellow {
+    @apply text-xs font-bold bg-yellow-900/30 text-yellow-400
+           border border-yellow-700/50 rounded-full px-3 py-1;
+  }
+
+  .badge-red {
+    @apply text-xs font-bold bg-red-900/30 text-red-400
+           border border-red-700/50 rounded-full px-3 py-1;
+  }
+
+  .page-wrapper {
+    @apply min-h-screen bg-gw-950 text-gw-200;
+  }
+
+  .section {
+    @apply max-w-6xl mx-auto px-4 py-12;
+  }
+}
