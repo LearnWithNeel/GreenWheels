@@ -1,0 +1,157 @@
+"use client";
+import { useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import StepA from "@/components/retrofit/StepA";
+import StepB from "@/components/retrofit/StepB";
+import StepC from "@/components/retrofit/StepC";
+import StepD from "@/components/retrofit/StepD";
+import StepE from "@/components/retrofit/StepE";
+import StepF from "@/components/retrofit/StepF";
+import StepG from "@/components/retrofit/StepG";
+import StepH from "@/components/retrofit/StepH";
+
+export type RetrofitFormData = {
+  // Step A
+  vehicleType: "car" | "bike" | "auto" | "";
+  // Step B
+  brand:        string;
+  model:        string;
+  year:         string;
+  registrationNumber: string;
+  color:        string;
+  fuelType:     string;
+  kmDriven:     string;
+  // Step C
+  photoFront:   string;
+  photoBack:    string;
+  photoLeft:    string;
+  photoRight:   string;
+  // Step D
+  rcDocument:   string;
+  ownerName:    string;
+  ownerAddress: string;
+  // Step E
+  retrofitType: "pure_electric" | "hybrid" | "";
+  // Step F
+  motorPower:   string;
+  // Step G
+  batteryCapacity: string;
+  expectedRange:   string;
+  chargingType:    string;
+  // Step H
+  specialRequests: string;
+};
+
+const INITIAL: RetrofitFormData = {
+  vehicleType: "", brand: "", model: "", year: "",
+  registrationNumber: "", color: "", fuelType: "", kmDriven: "",
+  photoFront: "", photoBack: "", photoLeft: "", photoRight: "",
+  rcDocument: "", ownerName: "", ownerAddress: "",
+  retrofitType: "", motorPower: "", batteryCapacity: "",
+  expectedRange: "", chargingType: "", specialRequests: "",
+};
+
+const STEPS = [
+  { id: "A", label: "Vehicle Type" },
+  { id: "B", label: "Details" },
+  { id: "C", label: "Photos" },
+  { id: "D", label: "Ownership" },
+  { id: "E", label: "Retrofit" },
+  { id: "F", label: "Motor" },
+  { id: "G", label: "Battery" },
+  { id: "H", label: "Review" },
+];
+
+export default function RetrofitPage() {
+  const { data: session } = useSession();
+  const router            = useRouter();
+  const [step, setStep]   = useState(0);
+  const [form, setForm]   = useState<RetrofitFormData>(INITIAL);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+
+  function updateForm(data: Partial<RetrofitFormData>) {
+    setForm(prev => ({ ...prev, ...data }));
+  }
+
+  function nextStep() { setStep(s => Math.min(s + 1, 7)); }
+  function prevStep() { setStep(s => Math.max(s - 1, 0)); }
+
+  async function handleSubmit() {
+    if (!session) { router.push("/login"); return; }
+    setSubmitting(true); setError("");
+    try {
+      const res  = await fetch("/api/retrofit", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify(form),
+      });
+      const data = await res.json();
+      if (!data.success) { setError(data.message); return; }
+      router.push(`/orders/${data.orderId}`);
+    } catch { setError("Something went wrong. Please try again."); }
+    finally { setSubmitting(false); }
+  }
+
+  const stepProps = { form, updateForm, nextStep, prevStep };
+
+  return (
+    <main className="page-wrapper">
+      <section className="section max-w-2xl mx-auto">
+
+        {/* Header */}
+        <div className="text-center mb-8">
+          <div className="badge-green inline-block mb-3">Retrofit Inquiry</div>
+          <h1 className="font-black text-3xl text-white">
+            Start Your EV Conversion
+          </h1>
+          <p className="text-gw-400 text-sm mt-2">
+            Step {step + 1} of 8 — {STEPS[step].label}
+          </p>
+        </div>
+
+        {/* Progress Bar */}
+        <div className="flex items-center gap-1 mb-8">
+          {STEPS.map((s, i) => (
+            <div key={s.id} className="flex-1 flex flex-col items-center gap-1">
+              <div className={`w-full h-1.5 rounded-full transition-all duration-300
+                ${i <= step ? "bg-lime-400" : "bg-gw-800"}`} />
+              <span className={`text-xs font-bold hidden md:block
+                ${i === step ? "text-lime-400" : i < step ? "text-gw-500" : "text-gw-700"}`}>
+                {s.id}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        {/* Error */}
+        {error && (
+          <div className="bg-red-900/30 border border-red-700/50 text-red-400
+                          text-sm rounded-xl px-4 py-3 mb-4">
+            {error}
+          </div>
+        )}
+
+        {/* Steps */}
+        <div className="card">
+          {step === 0 && <StepA {...stepProps} />}
+          {step === 1 && <StepB {...stepProps} />}
+          {step === 2 && <StepC {...stepProps} />}
+          {step === 3 && <StepD {...stepProps} />}
+          {step === 4 && <StepE {...stepProps} />}
+          {step === 5 && <StepF {...stepProps} />}
+          {step === 6 && <StepG {...stepProps} />}
+          {step === 7 && (
+            <StepH
+              {...stepProps}
+              onSubmit={handleSubmit}
+              submitting={submitting}
+            />
+          )}
+        </div>
+
+      </section>
+    </main>
+  );
+}
