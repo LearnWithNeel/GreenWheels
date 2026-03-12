@@ -3,6 +3,7 @@ import { Outfit } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import Providers from "./providers";
 import Navbar from "@/components/Navbar";
+import LegalBanner from "@/components/LegalBanner";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -39,6 +40,7 @@ export default function RootLayout({
               },
             }}
           />
+          <LegalBanner />
         </Providers>
       </body>
     </html>

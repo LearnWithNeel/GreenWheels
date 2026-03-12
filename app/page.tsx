@@ -4,28 +4,6 @@ export default function HomePage() {
   return (
     <main className="page-wrapper">
 
-      {/* ── NAVBAR ── */}
-      <nav style={{ borderBottom: "1px solid #14532d" }}
-        className="sticky top-0 z-50 bg-gw-950/90 backdrop-blur-sm">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gw-400 to-lime-400
-                            flex items-center justify-center text-lg">
-              🌿
-            </div>
-            <span className="font-black text-xl text-white">GreenWheels</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <Link href="/login"
-              className="text-sm font-semibold text-gw-400 hover:text-white transition-colors">
-              Login
-            </Link>
-            <Link href="/register" className="btn-primary text-sm py-2 px-4">
-              Get Started
-            </Link>
-          </div>
-        </div>
-      </nav>
 
       {/* ── HERO ── */}
       <section className="section text-center py-24">

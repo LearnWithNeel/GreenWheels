@@ -4,8 +4,7 @@ import User from "@/models/User";
 
 export async function POST(req: NextRequest) {
   try {
-    await connectDB();
-    const { email, password } = await req.json();
+    const { email, password, isAdmin } = await req.json();
 
     if (!email || !password) {
       return NextResponse.json(
@@ -14,6 +13,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // ── Admin check — against .env only, no DB needed ──
+    if (isAdmin) {
+      const adminEmail    = process.env.ADMIN_EMAIL;
+      const adminPassword = process.env.ADMIN_PASSWORD;
+
+      if (email !== adminEmail || password !== adminPassword) {
+        return NextResponse.json(
+          { success: false, message: "Invalid admin credentials." },
+          { status: 401 }
+        );
+      }
+      return NextResponse.json({ success: true });
+    }
+
+    // ── Customer check — against DB ──
+    await connectDB();
     const user = await User.findOne({ email }).select("+password");
 
     if (!user || !user.password) {

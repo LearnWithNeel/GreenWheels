@@ -14,6 +14,26 @@ export default function AdminLoginPage() {
   async function handleAdminLogin() {
     setLoading(true); setError("");
     try {
+      // Step 1 — validate fields
+      if (!form.email || !form.password) {
+        setError("Email and password are required.");
+        setLoading(false);
+        return;
+      }
+
+      // Step 2 — check credentials against .env
+      const checkRes  = await fetch("/api/auth/check-password", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email:    form.email,
+          password: form.password,
+          isAdmin:  true,
+        }),
+      });
+      const checkData = await checkRes.json();
+      if (!checkData.success) { setError(checkData.message); return; }
+
+      // Step 3 — credentials correct, send OTP
       const res  = await fetch("/api/auth/otp", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "send", role: "admin" }),
@@ -28,7 +48,7 @@ export default function AdminLoginPage() {
   async function handleVerifyAndLogin() {
     setLoading(true); setError("");
     try {
-      // Verify OTP
+      // Step 1 — verify OTP
       const otpRes  = await fetch("/api/auth/otp", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "verify", otp, role: "admin" }),
@@ -36,9 +56,11 @@ export default function AdminLoginPage() {
       const otpData = await otpRes.json();
       if (!otpData.success) { setError(otpData.message); return; }
 
-      // Sign in with NextAuth admin provider
+      // Step 2 — sign in with NextAuth
       const result = await signIn("admin-login", {
-        email: form.email, password: form.password, redirect: false,
+        email:    form.email,
+        password: form.password,
+        redirect: false,
       });
 
       if (result?.error) { setError("Invalid admin credentials."); return; }
@@ -63,7 +85,8 @@ export default function AdminLoginPage() {
 
         <div className="card">
           {error && (
-            <div className="bg-red-900/30 border border-red-700/50 text-red-400 text-sm rounded-xl px-4 py-3 mb-4">
+            <div className="bg-red-900/30 border border-red-700/50 text-red-400
+                            text-sm rounded-xl px-4 py-3 mb-4">
               {error}
             </div>
           )}
@@ -72,16 +95,21 @@ export default function AdminLoginPage() {
             <div className="flex flex-col gap-4">
               <div>
                 <label className="label">Admin Email</label>
-                <input className="input" type="email" placeholder="admin@greenwheels.in"
-                  value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+                <input className="input" type="email"
+                  placeholder="Enter admin email"
+                  value={form.email}
+                  onChange={e => setForm({ ...form, email: e.target.value })} />
               </div>
               <div>
                 <label className="label">Password</label>
-                <input className="input" type="password" placeholder="Admin password"
-                  value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
+                <input className="input" type="password"
+                  placeholder="Enter admin password"
+                  value={form.password}
+                  onChange={e => setForm({ ...form, password: e.target.value })} />
               </div>
-              <button className="btn-primary w-full mt-2" onClick={handleAdminLogin} disabled={loading}>
-                {loading ? "Sending OTP..." : "Send OTP →"}
+              <button className="btn-primary w-full mt-2"
+                onClick={handleAdminLogin} disabled={loading}>
+                {loading ? "Checking..." : "Send OTP →"}
               </button>
             </div>
           ) : (
@@ -90,9 +118,11 @@ export default function AdminLoginPage() {
                 <label className="label">Enter 6-digit OTP</label>
                 <input className="input text-center text-2xl tracking-widest font-mono"
                   placeholder="000000" maxLength={6}
-                  value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, ""))} />
+                  value={otp}
+                  onChange={e => setOtp(e.target.value.replace(/\D/g, ""))} />
               </div>
-              <button className="btn-primary w-full" onClick={handleVerifyAndLogin} disabled={loading}>
+              <button className="btn-primary w-full"
+                onClick={handleVerifyAndLogin} disabled={loading}>
                 {loading ? "Verifying..." : "Verify & Enter →"}
               </button>
               <button className="text-gw-400 text-sm hover:text-white transition-colors"
