@@ -13,7 +13,7 @@ export function generateOTP(): string {
 // ─── OTP expiry — 10 minutes from now ────────────────────────────────────────
 export function getOTPExpiry(): Date {
   const expiry = new Date();
-  expiry.setMinutes(expiry.getMinutes() + 10);
+  expiry.setMinutes(expiry.getMinutes() + 2);
   return expiry;
 }
 

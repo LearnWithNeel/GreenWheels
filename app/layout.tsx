@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import Providers from "./providers";
+import Navbar from "@/components/Navbar";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -25,6 +26,7 @@ export default function RootLayout({
     <html lang="en" className={outfit.variable}>
       <body>
         <Providers>
+            <Navbar />
           {children}
           <Toaster
             position="top-right"

@@ -1,8 +1,13 @@
-import { Resend } from "resend";
+import nodemailer from "nodemailer";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+});
 
-// ─── Send OTP Email ───────────────────────────────────────────────────────────
 export async function sendOTPEmail({
   to,
   name,
@@ -29,8 +34,8 @@ export async function sendOTPEmail({
       : "login to your account";
 
   try {
-    await resend.emails.send({
-      from:    process.env.EMAIL_FROM!,
+    await transporter.sendMail({
+      from: `"GreenWheels" <${process.env.GMAIL_USER}>`,
       to,
       subject,
       html: `
@@ -74,7 +79,7 @@ export async function sendOTPEmail({
                 </div>
 
                 <p style="color:#4ade80;font-size:13px;margin:0 0 8px;">
-                  This OTP is valid for <strong>10 minutes</strong> only.
+                  This OTP is valid for <strong>2 minutes</strong> only.
                 </p>
                 <p style="color:#4ade80;font-size:13px;margin:0;">
                   Never share this OTP with anyone.
