@@ -52,7 +52,9 @@ export default function LoginPage() {
             });
 
             if (result?.error) { setError("Invalid email or password."); return; }
-            router.push("/dashboard");
+            const params = new URLSearchParams(window.location.search);
+            const redirect = params.get("redirect") ?? "/dashboard";
+            router.push(redirect);
         } catch { setError("Something went wrong."); }
         finally { setLoading(false); }
     }
