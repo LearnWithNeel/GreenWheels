@@ -6,10 +6,14 @@ export type DealerStatus = "pending" | "approved" | "rejected";
 
 export interface IDealer extends Document {
   _id:             mongoose.Types.ObjectId;
+
+  // ── Auth ──
   name:            string;
   email:           string;
   password:        string;
   phone:           string;
+
+  // ── Business Info ──
   garageName:      string;
   garageAddress: {
     street:  string;
@@ -17,40 +21,53 @@ export interface IDealer extends Document {
     state:   string;
     pincode: string;
   };
+
+  // ── Specialization & Experience ──
   specialization:  string[];
   experience:      number;
+
+  // ── Documents & Media ──
   govtLicenseNo:   string;
   govtLicenseDoc?: string;
+  govtIdType:      string;
   profileImage?:   string;
   garageImages:    string[];
+  workshopPhotos:  string[];
+  certifications:  string[];
 
-  // Admin approval
-  status:          DealerStatus;
-  approvedAt?:     Date;
-  rejectedAt?:     Date;
+  // ── Admin Approval ──
+  status:           DealerStatus;
+  approvedAt?:      Date;
+  rejectedAt?:      Date;
   rejectionReason?: string;
+  rejectionNote:    string;
 
-  // OTP fields
+  // ── OTP & Verification ──
   emailVerified:   boolean;
   otpCode?:        string;
   otpExpiry?:      Date;
 
-  // Stats
+  // ── Stats ──
   totalJobsCompleted: number;
   totalEarnings:      number;
   rating:             number;
   reviewCount:        number;
+  totalOrders:        number;
 
-  isActive:    boolean;
+  // ── Activity ──
+  isActive:     boolean;
   lastLoginAt?: Date;
-  createdAt:   Date;
-  updatedAt:   Date;
+
+  createdAt: Date;
+  updatedAt: Date;
+
   comparePassword(candidate: string): Promise<boolean>;
 }
 
 // ─── Schema ───────────────────────────────────────────────────────────────────
 const DealerSchema = new Schema<IDealer>(
   {
+    // ── Auth ──
     name: {
       type:      String,
       required:  [true, "Name is required"],
@@ -67,16 +84,18 @@ const DealerSchema = new Schema<IDealer>(
       match:     [/^\S+@\S+\.\S+$/, "Invalid email address"],
     },
     password: {
-      type:     String,
-      required: [true, "Password is required"],
+      type:      String,
+      required:  [true, "Password is required"],
       minlength: 8,
-      select:   false,
+      select:    false,
     },
     phone: {
       type:     String,
       required: [true, "Phone is required"],
       trim:     true,
     },
+
+    // ── Business Info ──
     garageName: {
       type:     String,
       required: [true, "Garage name is required"],
@@ -89,29 +108,37 @@ const DealerSchema = new Schema<IDealer>(
       pincode: { type: String, required: true },
     },
 
-    // What types of vehicles dealer can retrofit
+    // ── Specialization & Experience ──
     specialization: {
       type:    [String],
       enum:    ["car", "bike", "auto-rickshaw"],
       default: [],
     },
+    experience: { type: Number, default: 0, min: 0 },
 
-    experience:    { type: Number, default: 0, min: 0 },
-    govtLicenseNo: { type: String, required: true, trim: true },
-    govtLicenseDoc:{ type: String },
-    profileImage:  { type: String },
-    garageImages:  { type: [String], default: [] },
+    // ── Documents & Media ──
+    govtLicenseNo:  { type: String, required: true, trim: true },
+    govtLicenseDoc: { type: String },
+    govtIdType:     { type: String, default: "" },
+    profileImage:   { type: String },
+    garageImages:   { type: [String], default: [] },
+    workshopPhotos: { type: [String], default: [] },
+    certifications: { type: [String], default: [] },
 
-    // ── Admin approval ──
-    // Dealer is invisible to customers until admin sets status to "approved"
-    status:          { type: String, enum: ["pending","approved","rejected"], default: "pending" },
+    // ── Admin Approval ──
+    status: {
+      type:    String,
+      enum:    ["pending", "approved", "rejected"],
+      default: "pending",
+    },
     approvedAt:      { type: Date },
     rejectedAt:      { type: Date },
     rejectionReason: { type: String },
+    rejectionNote:   { type: String, default: "" },
 
-    // ── OTP ──
+    // ── OTP & Verification ──
     emailVerified: { type: Boolean, default: false },
-    otpCode:       { type: String, select: false },
+    otpCode:       { type: String,  select: false },
     otpExpiry:     { type: Date },
 
     // ── Stats ──
@@ -119,7 +146,9 @@ const DealerSchema = new Schema<IDealer>(
     totalEarnings:      { type: Number, default: 0 },
     rating:             { type: Number, default: 0, min: 0, max: 5 },
     reviewCount:        { type: Number, default: 0 },
+    totalOrders:        { type: Number, default: 0 },
 
+    // ── Activity ──
     isActive:    { type: Boolean, default: true },
     lastLoginAt: { type: Date },
   },
@@ -127,12 +156,11 @@ const DealerSchema = new Schema<IDealer>(
 );
 
 // ─── Indexes ──────────────────────────────────────────────────────────────────
-DealerSchema.index({ email: 1 });
 DealerSchema.index({ status: 1 });
 DealerSchema.index({ "garageAddress.city": 1 });
 DealerSchema.index({ specialization: 1 });
 
-// ─── Auto hash password before saving ────────────────────────────────────────
+// ─── Auto hash password before saving ─────────────────────────────────────────
 DealerSchema.pre("save", async function (next) {
   if (!this.isModified("password") || !this.password) return next();
   try {
@@ -144,7 +172,7 @@ DealerSchema.pre("save", async function (next) {
   }
 });
 
-// ─── Method to verify login password ─────────────────────────────────────────
+// ─── Method to verify login password ──────────────────────────────────────────
 DealerSchema.methods.comparePassword = async function (
   candidate: string
 ): Promise<boolean> {
@@ -152,8 +180,9 @@ DealerSchema.methods.comparePassword = async function (
   return bcrypt.compare(candidate, this.password);
 };
 
-// ─── Prevent duplicate model error on hot reload ──────────────────────────────
+// ─── Prevent duplicate model error on hot reload ───────────────────────────────
 const Dealer: Model<IDealer> =
-  mongoose.models.Dealer ?? mongoose.model<IDealer>("Dealer", DealerSchema);
+  mongoose.models.Dealer ??
+  mongoose.model<IDealer>("Dealer", DealerSchema);
 
 export default Dealer;
