@@ -13,7 +13,7 @@ export default function DealerDashboardPage() {
             Welcome to Your Workshop Panel 🔧
           </h1>
           <p className="text-gw-400 text-sm">
-            Your full dashboard is coming in Week 8.
+            Your orders will appear here once customers start submitting inquiries.
           </p>
         </div>
 

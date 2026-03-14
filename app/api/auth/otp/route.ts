@@ -1,70 +1,84 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-    verifyCustomerOTP,
-    sendCustomerOTP,
-    sendAdminOTP,
-    verifyAdminOTP,
+  verifyCustomerOTP,
+  sendCustomerOTP,
+  sendDealerOTP,
+  verifyDealerOTP,
+  sendAdminOTP,
+  verifyAdminOTP,
 } from "@/lib/otp";
 
 export async function POST(req: NextRequest) {
-    try {
-        const { action, email, otp, role } = await req.json();
+  try {
+    const { action, email, otp, role } = await req.json();
 
-        // ── action: "send" — resend OTP ──────────────────────────────────────────
-        if (action === "send") {
-            // Admin check FIRST — no email needed
-            if (role === "admin") {
-                const result = await sendAdminOTP();
-                return NextResponse.json(result);
-            }
+    // ── action: "send" ────────────────────────────────────────────────────────
+    if (action === "send") {
+      if (role === "admin") {
+        const result = await sendAdminOTP();
+        return NextResponse.json(result);
+      }
 
-            // Customer/dealer — email required
-            if (!email) {
-                return NextResponse.json(
-                    { success: false, message: "Email is required." },
-                    { status: 400 }
-                );
-            }
-
-            const result = await sendCustomerOTP(email, "login");
-            return NextResponse.json(result);
-        }
-
-        // ── action: "verify" — verify OTP ────────────────────────────────────────
-        if (action === "verify") {
-            if (!otp) {
-                return NextResponse.json(
-                    { success: false, message: "OTP is required." },
-                    { status: 400 }
-                );
-            }
-
-            if (role === "admin") {
-                const result = await verifyAdminOTP(otp);
-                return NextResponse.json(result);
-            }
-
-            if (!email) {
-                return NextResponse.json(
-                    { success: false, message: "Email is required." },
-                    { status: 400 }
-                );
-            }
-
-            const result = await verifyCustomerOTP(email, otp);
-            return NextResponse.json(result);
-        }
-
+      if (!email) {
         return NextResponse.json(
-            { success: false, message: "Invalid action." },
-            { status: 400 }
+          { success: false, message: "Email is required." },
+          { status: 400 }
         );
+      }
 
-    } catch (error) {
-        console.error("[API] /otp error:", error);
-        return NextResponse.json(
-            { success: false, message: "Something went wrong. Please try again." },
-            { status: 500 }
-        );
+      // ── Dealer OTP ──
+      if (role === "dealer") {
+        const result = await sendDealerOTP(email, "login");
+        return NextResponse.json(result);
+      }
+
+      // ── Customer OTP ──
+      const result = await sendCustomerOTP(email, "login");
+      return NextResponse.json(result);
     }
+
+    // ── action: "verify" ──────────────────────────────────────────────────────
+    if (action === "verify") {
+      if (!otp) {
+        return NextResponse.json(
+          { success: false, message: "OTP is required." },
+          { status: 400 }
+        );
+      }
+
+      if (role === "admin") {
+        const result = await verifyAdminOTP(otp);
+        return NextResponse.json(result);
+      }
+
+      if (!email) {
+        return NextResponse.json(
+          { success: false, message: "Email is required." },
+          { status: 400 }
+        );
+      }
+
+      // ── Dealer OTP verify ──
+      if (role === "dealer") {
+        const result = await verifyDealerOTP(email, otp);
+        return NextResponse.json(result);
+      }
+
+      // ── Customer OTP verify ──
+      const result = await verifyCustomerOTP(email, otp);
+      return NextResponse.json(result);
+    }
+
+    return NextResponse.json(
+      { success: false, message: "Invalid action." },
+      { status: 400 }
+    );
+
+  } catch (error) {
+    console.error("[API] /otp error:", error);
+    return NextResponse.json(
+      { success: false, message: "Something went wrong." },
+      { status: 500 }
+    );
+  }
 }

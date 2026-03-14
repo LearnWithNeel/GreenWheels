@@ -18,12 +18,14 @@ export default function Navbar() {
   return (
     <nav style={{ borderBottom: "1px solid #14532d" }}
       className="sticky top-0 z-50 bg-gw-950/90 backdrop-blur-sm">
-      <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-4 py-4 flex items-center
+                      justify-between">
 
         {/* ── Logo ── */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gw-400 to-lime-400
-                          flex items-center justify-center text-lg">
+          <div className="w-8 h-8 rounded-lg bg-gradient-to-br
+                          from-gw-400 to-lime-400 flex items-center
+                          justify-center text-lg">
             🌿
           </div>
           <span className="font-black text-xl text-white">GreenWheels</span>
@@ -31,16 +33,20 @@ export default function Navbar() {
 
         {/* ── Desktop Links ── */}
         <div className="hidden md:flex items-center gap-6 text-sm font-medium">
-          <Link href="/retrofit"  className="text-gw-400 hover:text-white transition-colors">
+          <Link href="/retrofit"
+            className="text-gw-400 hover:text-white transition-colors">
             Retrofit
           </Link>
-          <Link href="/shop"      className="text-gw-400 hover:text-white transition-colors">
+          <Link href="/shop"
+            className="text-gw-400 hover:text-white transition-colors">
             Shop
           </Link>
-          <Link href="/legal"     className="text-gw-400 hover:text-white transition-colors">
+          <Link href="/how-it-works"
+            className="text-gw-400 hover:text-white transition-colors">
             How It Works
           </Link>
-          <Link href="/franchise" className="text-gw-400 hover:text-white transition-colors">
+          <Link href="/franchise"
+            className="text-gw-400 hover:text-white transition-colors">
             Franchise
           </Link>
         </div>
@@ -50,7 +56,8 @@ export default function Navbar() {
           {session ? (
             <>
               <Link href={getDashboardLink()}
-                className="text-sm font-semibold text-gw-400 hover:text-white transition-colors">
+                className="text-sm font-semibold text-gw-400
+                           hover:text-white transition-colors">
                 👋 {session.user?.name?.split(" ")[0]}
               </Link>
               <button
@@ -61,11 +68,18 @@ export default function Navbar() {
             </>
           ) : (
             <>
+              <Link href="/dealer/register"
+                className="text-sm font-semibold text-gw-400
+                           hover:text-white transition-colors">
+                Become a Dealer
+              </Link>
               <Link href="/login"
-                className="text-sm font-semibold text-gw-400 hover:text-white transition-colors">
+                className="text-sm font-semibold text-gw-400
+                           hover:text-white transition-colors">
                 Login
               </Link>
-              <Link href="/register" className="btn-primary text-sm py-2 px-4">
+              <Link href="/register"
+                className="btn-primary text-sm py-2 px-4">
                 Get Started
               </Link>
             </>
@@ -74,7 +88,8 @@ export default function Navbar() {
 
         {/* ── Mobile Hamburger ── */}
         <button
-          className="md:hidden text-gw-400 hover:text-white transition-colors text-2xl"
+          className="md:hidden text-gw-400 hover:text-white
+                     transition-colors text-2xl"
           onClick={() => setMenuOpen(!menuOpen)}>
           {menuOpen ? "✕" : "☰"}
         </button>
@@ -84,20 +99,38 @@ export default function Navbar() {
       {menuOpen && (
         <div style={{ borderTop: "1px solid #14532d" }}
           className="md:hidden bg-gw-950 px-4 py-4 flex flex-col gap-4">
-          <Link href="/retrofit"  className="text-gw-400 hover:text-white text-sm font-medium"
-            onClick={() => setMenuOpen(false)}>Retrofit</Link>
-          <Link href="/shop"      className="text-gw-400 hover:text-white text-sm font-medium"
-            onClick={() => setMenuOpen(false)}>Shop</Link>
-          <Link href="/legal"     className="text-gw-400 hover:text-white text-sm font-medium"
-            onClick={() => setMenuOpen(false)}>How It Works</Link>
-          <Link href="/franchise" className="text-gw-400 hover:text-white text-sm font-medium"
-            onClick={() => setMenuOpen(false)}>Franchise</Link>
+          <Link href="/retrofit"
+            className="text-gw-400 hover:text-white text-sm font-medium"
+            onClick={() => setMenuOpen(false)}>
+            Retrofit
+          </Link>
+          <Link href="/shop"
+            className="text-gw-400 hover:text-white text-sm font-medium"
+            onClick={() => setMenuOpen(false)}>
+            Shop
+          </Link>
+          <Link href="/how-it-works"
+            className="text-gw-400 hover:text-white text-sm font-medium"
+            onClick={() => setMenuOpen(false)}>
+            How It Works
+          </Link>
+          <Link href="/franchise"
+            className="text-gw-400 hover:text-white text-sm font-medium"
+            onClick={() => setMenuOpen(false)}>
+            Franchise
+          </Link>
+          <Link href="/dealer/register"
+            className="text-lime-400 hover:text-white text-sm font-medium"
+            onClick={() => setMenuOpen(false)}>
+            🔧 Become a Dealer
+          </Link>
 
           <div style={{ borderTop: "1px solid #14532d" }} className="pt-4">
             {session ? (
               <>
                 <Link href={getDashboardLink()}
-                  className="block text-gw-400 hover:text-white text-sm font-medium mb-3"
+                  className="block text-gw-400 hover:text-white
+                             text-sm font-medium mb-3"
                   onClick={() => setMenuOpen(false)}>
                   👋 {session.user?.name}
                 </Link>
@@ -109,10 +142,16 @@ export default function Navbar() {
               </>
             ) : (
               <div className="flex flex-col gap-3">
-                <Link href="/login" className="btn-secondary w-full text-sm py-2 text-center"
-                  onClick={() => setMenuOpen(false)}>Login</Link>
-                <Link href="/register" className="btn-primary w-full text-sm py-2 text-center"
-                  onClick={() => setMenuOpen(false)}>Get Started</Link>
+                <Link href="/login"
+                  className="btn-secondary w-full text-sm py-2 text-center"
+                  onClick={() => setMenuOpen(false)}>
+                  Login
+                </Link>
+                <Link href="/register"
+                  className="btn-primary w-full text-sm py-2 text-center"
+                  onClick={() => setMenuOpen(false)}>
+                  Get Started
+                </Link>
               </div>
             )}
           </div>

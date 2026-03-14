@@ -9,7 +9,7 @@ export default function DashboardPage() {
           Welcome to GreenWheels 🌿
         </h1>
         <p className="text-gw-300 text-lg mb-8">
-          Your dashboard is being built — coming in Week 7.
+          Submit a retrofit inquiry and track your orders here.
         </p>
         <Link href="/retrofit" className="btn-primary text-base py-4 px-8">
           Start a Retrofit Inquiry →
