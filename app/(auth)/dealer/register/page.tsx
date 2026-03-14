@@ -1,7 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import LoadingDots from "@/components/LoadingDots";
+
+const STORAGE_KEY = "gw-dealer-register-form";
 
 const STATES = [
   "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
@@ -23,43 +26,64 @@ const GOVT_ID_TYPES = [
 
 export default function DealerRegisterPage() {
   const router = useRouter();
-  const [step, setStep]       = useState<"form" | "otp">("form");
+  const [step, setStep] = useState<"form" | "otp">("form");
   const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState("");
-  const [otp, setOtp]         = useState("");
+  const [error, setError] = useState("");
+  const [otp, setOtp] = useState("");
+
 
   // Upload states
-  const [uploadingLicDoc, setUploadingLicDoc]   = useState(false);
+  const [uploadingLicDoc, setUploadingLicDoc] = useState(false);
   const [uploadingProfile, setUploadingProfile] = useState(false);
 
   const [form, setForm] = useState({
     // Auth
-    name:            "",
-    email:           "",
-    password:        "",
+    name: "",
+    email: "",
+    password: "",
     confirmPassword: "",
-    phone:           "",
+    phone: "",
 
     // Business
-    garageName:      "",
-    govtLicenseNo:   "",
-    govtIdType:      "",
-    govtLicenseDoc:  "",  // uploaded URL
-    profileImage:    "",  // uploaded URL
+    garageName: "",
+    govtLicenseNo: "",
+    govtIdType: "",
+    govtLicenseDoc: "",  // uploaded URL
+    profileImage: "",  // uploaded URL
 
     // Address
-    street:          "",
-    city:            "",
-    state:           "",
-    pincode:         "",
+    street: "",
+    city: "",
+    state: "",
+    pincode: "",
 
     // Skills
-    specialization:  [] as string[],
-    experience:      "",
+    specialization: [] as string[],
+    experience: "",
 
     // Extra
-    certifications:  [] as string[],
+    certifications: [] as string[],
   });
+
+  const [restored, setRestored] = useState(false);
+
+  // ── Restore from localStorage on mount ──
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) setForm(JSON.parse(saved));
+    } catch { }
+    setRestored(true);
+  }, []);
+
+  // ── Auto save ONLY after restore is done ──
+  useEffect(() => {
+    if (!restored) return;
+    try {
+      const { password, confirmPassword, ...safeForm } = form;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(safeForm));
+    } catch { }
+  }, [form, restored]);
 
   function toggleSpec(type: string) {
     setForm(prev => ({
@@ -71,8 +95,8 @@ export default function DealerRegisterPage() {
   }
 
   async function handleUpload(
-    file:    File,
-    field:   "govtLicenseDoc" | "profileImage",
+    file: File,
+    field: "govtLicenseDoc" | "profileImage",
     setStat: (v: boolean) => void
   ) {
     if (!file) return;
@@ -84,7 +108,7 @@ export default function DealerRegisterPage() {
       const data = new FormData();
       data.append("file", file);
       data.append("key", field);
-      const res  = await fetch("/api/upload", { method: "POST", body: data });
+      const res = await fetch("/api/upload", { method: "POST", body: data });
       const json = await res.json();
       if (!json.success) { setError(json.message); return; }
       setForm(prev => ({ ...prev, [field]: json.url }));
@@ -97,9 +121,9 @@ export default function DealerRegisterPage() {
     try {
       // Validate required fields
       if (!form.name || !form.email || !form.password ||
-          !form.phone || !form.garageName || !form.govtLicenseNo ||
-          !form.govtIdType || !form.street || !form.city ||
-          !form.state || !form.pincode) {
+        !form.phone || !form.garageName || !form.govtLicenseNo ||
+        !form.govtIdType || !form.street || !form.city ||
+        !form.state || !form.pincode) {
         setError("All fields marked are required."); return;
       }
       if (form.password !== form.confirmPassword) {
@@ -115,48 +139,50 @@ export default function DealerRegisterPage() {
         setError("Please upload your government license document."); return;
       }
 
-      const res  = await fetch("/api/auth/dealer-register", {
-        method:  "POST",
+      const res = await fetch("/api/auth/dealer-register", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({
-          name:          form.name,
-          email:         form.email,
-          password:      form.password,
-          phone:         form.phone,
-          garageName:    form.garageName,
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          password: form.password,
+          phone: form.phone,
+          garageName: form.garageName,
           govtLicenseNo: form.govtLicenseNo,
-          govtIdType:    form.govtIdType,
+          govtIdType: form.govtIdType,
           govtLicenseDoc: form.govtLicenseDoc,
-          profileImage:  form.profileImage,
+          profileImage: form.profileImage,
           garageAddress: {
-            street:  form.street,
-            city:    form.city,
-            state:   form.state,
+            street: form.street,
+            city: form.city,
+            state: form.state,
             pincode: form.pincode,
           },
           specialization: form.specialization,
-          experience:     parseInt(form.experience) || 0,
+          experience: parseInt(form.experience) || 0,
           certifications: form.certifications,
         }),
       });
       const data = await res.json();
       if (!data.success) { setError(data.message); return; }
+      localStorage.removeItem(STORAGE_KEY);
       setStep("otp");
     } catch { setError("Something went wrong."); }
     finally { setLoading(false); }
   }
 
-  async function handleVerifyOtp() {
+  async function handleVerifyOtp(otpValue?: string) {
+    const finalOtp = otpValue ?? otp;
     setError(""); setLoading(true);
     try {
-      const res  = await fetch("/api/auth/otp", {
-        method:  "POST",
+      const res = await fetch("/api/auth/otp", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({
+        body: JSON.stringify({
           action: "verify",
-          otp,
-          role:   "dealer",
-          email:  form.email,
+          otp: finalOtp,
+          role: "dealer",
+          email: form.email,
         }),
       });
       const data = await res.json();
@@ -170,15 +196,15 @@ export default function DealerRegisterPage() {
     setLoading(true);
     try {
       await fetch("/api/auth/otp", {
-        method:  "POST",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({
+        body: JSON.stringify({
           action: "send",
-          role:   "dealer",
-          email:  form.email,
+          role: "dealer",
+          email: form.email,
         }),
       });
-    } catch {}
+    } catch { }
     finally { setLoading(false); }
   }
 
@@ -265,8 +291,12 @@ export default function DealerRegisterPage() {
                   <label className="label">Phone Number *</label>
                   <input className="input" type="tel"
                     placeholder="10-digit mobile"
+                    maxLength={10}
                     value={form.phone}
-                    onChange={e => setForm({ ...form, phone: e.target.value })} />
+                    onChange={e => setForm({
+                      ...form,
+                      phone: e.target.value.replace(/\D/g, "").slice(0, 10)
+                    })} />
                 </div>
               </div>
 
@@ -290,12 +320,32 @@ export default function DealerRegisterPage() {
                 </div>
                 <div>
                   <label className="label">Confirm Password *</label>
-                  <input className="input" type="password"
+                  <input
+                    className="input"
+                    type="password"
                     placeholder="Repeat password"
                     value={form.confirmPassword}
                     onChange={e => setForm({
                       ...form, confirmPassword: e.target.value
-                    })} />
+                    })}
+                    style={{
+                      border: form.confirmPassword
+                        ? form.confirmPassword === form.password
+                          ? "2px solid #a3e635"
+                          : "2px solid #ef4444"
+                        : undefined
+                    }}
+                  />
+                  {form.confirmPassword && (
+                    <p className={`text-xs mt-1 font-medium ${form.confirmPassword === form.password
+                      ? "text-lime-400"
+                      : "text-red-400"
+                      }`}>
+                      {form.confirmPassword === form.password
+                        ? "✓ Passwords match"
+                        : "✗ Passwords do not match"}
+                    </p>
+                  )}
                 </div>
               </div>
 
@@ -463,17 +513,16 @@ export default function DealerRegisterPage() {
 
               <div className="flex gap-3">
                 {[
-                  { type: "car",           icon: "🚗", label: "Car" },
-                  { type: "bike",          icon: "🏍️", label: "Bike" },
+                  { type: "car", icon: "🚗", label: "Car" },
+                  { type: "bike", icon: "🏍️", label: "Bike" },
                   { type: "auto-rickshaw", icon: "🛺", label: "Auto" },
                 ].map(v => (
                   <button key={v.type} type="button"
                     onClick={() => toggleSpec(v.type)}
                     style={{
-                      border: `2px solid ${
-                        form.specialization.includes(v.type)
-                          ? "#a3e635" : "#14532d"
-                      }`,
+                      border: `2px solid ${form.specialization.includes(v.type)
+                        ? "#a3e635" : "#14532d"
+                        }`,
                     }}
                     className={`flex-1 rounded-xl py-3 flex flex-col
                       items-center gap-1 transition-all
@@ -547,7 +596,7 @@ export default function DealerRegisterPage() {
 
               <button className="btn-primary w-full mt-2"
                 onClick={handleRegister} disabled={loading}>
-                {loading ? "Registering..." : "Register & Send OTP →"}
+                {loading ? <><span>Registering</span> <LoadingDots /></> : "Register & Send OTP →"}
               </button>
 
               <p className="text-center text-gw-500 text-xs">
@@ -572,15 +621,15 @@ export default function DealerRegisterPage() {
                              tracking-widest font-mono"
                   placeholder="000000" maxLength={6}
                   value={otp}
-                  onChange={e => setOtp(
-                    e.target.value.replace(/\D/g, "")
-                  )} />
+                  onChange={e => {
+                    const val = e.target.value.replace(/\D/g, "");
+                    setOtp(val);
+                    if (val.length === 6) handleVerifyOtp(val);
+                  }} />
               </div>
               <button className="btn-primary w-full"
-                onClick={handleVerifyOtp} disabled={loading}>
-                {loading
-                  ? "Verifying..."
-                  : "Verify & Complete Registration →"}
+                onClick={() => handleVerifyOtp()} disabled={loading}>
+                {loading ? <><span>Verifying</span> <LoadingDots /></> : "Verify & Complete Registration →"}
               </button>
               <button
                 className="text-gw-400 text-sm hover:text-white

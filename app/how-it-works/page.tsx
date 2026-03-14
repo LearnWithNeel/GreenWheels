@@ -67,7 +67,7 @@ export default function HowItWorksPage() {
             only after verification passes</strong>. If your vehicle
             fails verification — your order is cancelled and
             <strong className="text-white"> zero rupees are charged</strong>.
-            No risk. No fine print. No surprises.
+            No risk. No hidden charges. No surprises.
           </p>
         </div>
 

@@ -193,33 +193,6 @@ export default function HomePage() {
                 </div>
             </section>
 
-            {/* ── FOOTER ── */}
-            <footer style={{ borderTop: "1px solid #14532d" }}
-                className="bg-gw-900 py-10">
-                <div className="max-w-6xl mx-auto px-4">
-                    <div className="flex flex-col md:flex-row items-center
-                          justify-between gap-6">
-                        <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-lg bg-gradient-to-br
-                              from-gw-400 to-lime-400
-                              flex items-center justify-center text-sm">
-                                🌿
-                            </div>
-                            <span className="font-black text-white">GreenWheels</span>
-                        </div>
-                        <div className="flex items-center gap-6 text-sm text-gw-400">
-                            <Link href="/legal" className="hover:text-white transition-colors">Legal Info</Link>
-                            <Link href="/franchise" className="hover:text-white transition-colors">Franchise</Link>
-                            <Link href="/login" className="hover:text-white transition-colors">Login</Link>
-                            <Link href="/register" className="hover:text-white transition-colors">Register</Link>
-                        </div>
-                    </div>
-                    <div className="text-center text-xs text-gw-700 mt-8">
-                        © 2026 GreenWheels. All rights reserved. Making India electric, one vehicle at a time.
-                    </div>
-                </div>
-            </footer>
-
         </main>
     );
 }

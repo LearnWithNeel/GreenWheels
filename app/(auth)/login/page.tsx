@@ -3,15 +3,16 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
+import LoadingDots from "@/components/LoadingDots";
 
 export default function LoginPage() {
-  const router       = useRouter();
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const [step, setStep]       = useState<"form" | "otp">("form");
+  const [step, setStep] = useState<"form" | "otp">("form");
   const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState("");
-  const [form, setForm]       = useState({ email: "", password: "" });
-  const [otp, setOtp]         = useState("");
+  const [error, setError] = useState("");
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [otp, setOtp] = useState("");
   const [userRole, setUserRole] = useState<"customer" | "dealer">("customer");
 
   // Show registered message
@@ -25,11 +26,11 @@ export default function LoginPage() {
       }
 
       // Step 1 — check password
-      const checkRes  = await fetch("/api/auth/check-password", {
-        method:  "POST",
+      const checkRes = await fetch("/api/auth/check-password", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({
-          email:    form.email,
+        body: JSON.stringify({
+          email: form.email,
           password: form.password,
         }),
       });
@@ -40,13 +41,13 @@ export default function LoginPage() {
       setUserRole(checkData.role || "customer");
 
       // Step 2 — send OTP
-      const otpRes  = await fetch("/api/auth/otp", {
-        method:  "POST",
+      const otpRes = await fetch("/api/auth/otp", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({
+        body: JSON.stringify({
           action: "send",
-          email:  form.email,
-          role:   checkData.role || "customer",
+          email: form.email,
+          role: checkData.role || "customer",
         }),
       });
       const otpData = await otpRes.json();
@@ -56,18 +57,18 @@ export default function LoginPage() {
     finally { setLoading(false); }
   }
 
-  async function handleVerifyAndLogin() {
+  async function handleVerifyAndLogin(otpValue?: string) {
+    const finalOtp = otpValue ?? otp;
     setLoading(true); setError("");
     try {
-      // Step 1 — verify OTP
-      const otpRes  = await fetch("/api/auth/otp", {
-        method:  "POST",
+      const otpRes = await fetch("/api/auth/otp", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({
+        body: JSON.stringify({
           action: "verify",
-          email:  form.email,
-          otp,
-          role:   userRole,
+          email: form.email,
+          otp: finalOtp,
+          role: userRole,
         }),
       });
       const otpData = await otpRes.json();
@@ -79,7 +80,7 @@ export default function LoginPage() {
         : "customer-login";
 
       const result = await signIn(provider, {
-        email:    form.email,
+        email: form.email,
         password: form.password,
         redirect: false,
       });
@@ -166,7 +167,7 @@ export default function LoginPage() {
               </div>
               <button className="btn-primary w-full mt-2"
                 onClick={handleLogin} disabled={loading}>
-                {loading ? "Checking..." : "Continue →"}
+                {loading ? <><span>Checking</span> <LoadingDots /></> : "Continue →"}
               </button>
 
               <div className="relative my-2">
@@ -197,13 +198,15 @@ export default function LoginPage() {
                              tracking-widest font-mono"
                   placeholder="000000" maxLength={6}
                   value={otp}
-                  onChange={e => setOtp(
-                    e.target.value.replace(/\D/g, "")
-                  )} />
+                  onChange={e => {
+                    const val = e.target.value.replace(/\D/g, "");
+                    setOtp(val);
+                    if (val.length === 6) handleVerifyAndLogin(val);
+                  }} />
               </div>
               <button className="btn-primary w-full"
-                onClick={handleVerifyAndLogin} disabled={loading}>
-                {loading ? "Verifying..." : "Verify & Login →"}
+                onClick={() => handleVerifyAndLogin()} disabled={loading}>
+                {loading ? <><span>Verifying</span> <LoadingDots /></> : "Verify & Login →"}
               </button>
               <button
                 className="text-gw-400 text-sm hover:text-white

@@ -2,14 +2,15 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import LoadingDots from "@/components/LoadingDots";
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [step, setStep]       = useState<"form" | "otp">("form");
+  const [step, setStep] = useState<"form" | "otp">("form");
   const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState("");
-  const [form, setForm]       = useState({ email: "", password: "" });
-  const [otp, setOtp]         = useState("");
+  const [error, setError] = useState("");
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [otp, setOtp] = useState("");
 
   async function handleAdminLogin() {
     setLoading(true); setError("");
@@ -22,19 +23,19 @@ export default function AdminLoginPage() {
       }
 
       // Step 2 — check credentials against .env
-      const checkRes  = await fetch("/api/auth/check-password", {
+      const checkRes = await fetch("/api/auth/check-password", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email:    form.email,
+          email: form.email,
           password: form.password,
-          isAdmin:  true,
+          isAdmin: true,
         }),
       });
       const checkData = await checkRes.json();
       if (!checkData.success) { setError(checkData.message); return; }
 
       // Step 3 — credentials correct, send OTP
-      const res  = await fetch("/api/auth/otp", {
+      const res = await fetch("/api/auth/otp", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ action: "send", role: "admin" }),
       });
@@ -45,20 +46,26 @@ export default function AdminLoginPage() {
     finally { setLoading(false); }
   }
 
-  async function handleVerifyAndLogin() {
+  async function handleVerifyAndLogin(otpValue?: string) {
+    const finalOtp = otpValue ?? otp;
     setLoading(true); setError("");
     try {
-      // Step 1 — verify OTP
-      const otpRes  = await fetch("/api/auth/otp", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "verify", otp, role: "admin" }),
+      const otpRes = await fetch("/api/auth/otp", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "verify",
+          email: form.email,
+          otp: finalOtp,
+          role: "admin"
+        }),
       });
       const otpData = await otpRes.json();
       if (!otpData.success) { setError(otpData.message); return; }
 
       // Step 2 — sign in with NextAuth
       const result = await signIn("admin-login", {
-        email:    form.email,
+        email: form.email,
         password: form.password,
         redirect: false,
       });
@@ -109,7 +116,7 @@ export default function AdminLoginPage() {
               </div>
               <button className="btn-primary w-full mt-2"
                 onClick={handleAdminLogin} disabled={loading}>
-                {loading ? "Checking..." : "Send OTP →"}
+                {loading ? <><span>Checking</span> <LoadingDots /></> : "Send OTP →"}
               </button>
             </div>
           ) : (
@@ -119,11 +126,15 @@ export default function AdminLoginPage() {
                 <input className="input text-center text-2xl tracking-widest font-mono"
                   placeholder="000000" maxLength={6}
                   value={otp}
-                  onChange={e => setOtp(e.target.value.replace(/\D/g, ""))} />
+                  onChange={e => {
+                    const val = e.target.value.replace(/\D/g, "");
+                    setOtp(val);
+                    if (val.length === 6) handleVerifyAndLogin(val);
+                  }} />
               </div>
               <button className="btn-primary w-full"
-                onClick={handleVerifyAndLogin} disabled={loading}>
-                {loading ? "Verifying..." : "Verify & Enter →"}
+                onClick={() => handleVerifyAndLogin()} disabled={loading}>
+                {loading ? <><span>Verifying</span> <LoadingDots /></> : "Verify & Enter →"}
               </button>
               <button className="text-gw-400 text-sm hover:text-white transition-colors"
                 onClick={() => handleAdminLogin()}>

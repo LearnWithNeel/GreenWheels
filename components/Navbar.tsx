@@ -10,7 +10,7 @@ export default function Navbar() {
   const role = (session?.user as { role?: string })?.role;
 
   function getDashboardLink() {
-    if (role === "admin")  return "/admin/dashboard";
+    if (role === "admin") return "/admin/dashboard";
     if (role === "dealer") return "/dealer/dashboard";
     return "/dashboard";
   }
@@ -23,12 +23,28 @@ export default function Navbar() {
 
         {/* ── Logo ── */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br
-                          from-gw-400 to-lime-400 flex items-center
-                          justify-center text-lg">
-            🌿
-          </div>
-          <span className="font-black text-xl text-white">GreenWheels</span>
+          <span id="navbar-logo-icon">
+            <svg width="36" height="36" viewBox="0 0 500 500" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="250" cy="250" r="250" fill="#052e16" />
+              <circle cx="250" cy="130" r="45" fill="#14532d" />
+              <circle cx="250" cy="130" r="28" fill="#15803d" />
+              <circle cx="250" cy="130" r="16" fill="#a3e635" />
+              <path d="M50 285 L130 205 L250 260 L370 195 L450 285 Z" fill="#0f3d1f" />
+              <rect x="50" y="285" width="400" height="165" fill="#1a3a1a" />
+              <rect x="152" y="300" width="196" height="38" rx="6" fill="#15803d" />
+              <path d="M195 300 C198 272 220 259 250 259 C280 259 302 272 305 300 Z" fill="#166534" />
+              <circle cx="192" cy="340" r="23" fill="#0a0a0a" />
+              <circle cx="192" cy="340" r="13" fill="#a3e635" />
+              <circle cx="308" cy="340" r="23" fill="#0a0a0a" />
+              <circle cx="308" cy="340" r="13" fill="#a3e635" />
+              <polygon points="264,235 236,281 252,281 224,343 272,275 254,275 278,235" fill="#a3e635" />
+            </svg>
+          </span>
+          <span
+            id="navbar-logo-text"
+            className="font-black text-xl text-white">
+            GreenWheels
+          </span>
         </Link>
 
         {/* ── Desktop Links ── */}

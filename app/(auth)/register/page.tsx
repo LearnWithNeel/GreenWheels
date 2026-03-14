@@ -2,20 +2,21 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import LoadingDots from "@/components/LoadingDots";
 
 export default function RegisterPage() {
   const router = useRouter();
-  const [step, setStep]       = useState<"form" | "otp">("form");
+  const [step, setStep] = useState<"form" | "otp">("form");
   const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState("");
-  const [email, setEmail]     = useState("");
-  const [form, setForm]       = useState({ name: "", email: "", password: "" });
-  const [otp, setOtp]         = useState("");
+  const [error, setError] = useState("");
+  const [email, setEmail] = useState("");
+  const [form, setForm] = useState({ name: "", email: "", password: "" });
+  const [otp, setOtp] = useState("");
 
   async function handleRegister() {
     setLoading(true); setError("");
     try {
-      const res  = await fetch("/api/auth/register", {
+      const res = await fetch("/api/auth/register", {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
@@ -27,12 +28,19 @@ export default function RegisterPage() {
     finally { setLoading(false); }
   }
 
-  async function handleVerifyOTP() {
-    setLoading(true); setError("");
-    try {
-      const res  = await fetch("/api/auth/otp", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "verify", email, otp }),
+  async function handleVerifyOtp(otpValue?: string) {
+  const finalOtp = otpValue ?? otp;
+  setError(""); setLoading(true);
+  try {
+    const res = await fetch("/api/auth/otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "verify",
+        otp:    finalOtp,
+        role: "customer",
+        email: form.email,
+      }),
       });
       const data = await res.json();
       if (!data.success) { setError(data.message); return; }
@@ -82,7 +90,7 @@ export default function RegisterPage() {
                   value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
               </div>
               <button className="btn-primary w-full mt-2" onClick={handleRegister} disabled={loading}>
-                {loading ? "Creating account..." : "Create Account →"}
+                {loading ? <><span>Creating account</span> <LoadingDots /></> : "Create Account →"}
               </button>
             </div>
           ) : (
@@ -91,10 +99,16 @@ export default function RegisterPage() {
                 <label className="label">Enter 6-digit OTP</label>
                 <input className="input text-center text-2xl tracking-widest font-mono"
                   placeholder="000000" maxLength={6}
-                  value={otp} onChange={e => setOtp(e.target.value.replace(/\D/g, ""))} />
+                  value={otp}
+                  onChange={e => {
+                    const val = e.target.value.replace(/\D/g, "");
+                    setOtp(val);
+                    if (val.length === 6) handleVerifyOtp(val);
+                  }} />
               </div>
-              <button className="btn-primary w-full" onClick={handleVerifyOTP} disabled={loading}>
-                {loading ? "Verifying..." : "Verify OTP →"}
+              <button className="btn-primary w-full" 
+              onClick={() => handleVerifyOtp()} disabled={loading}>
+                {loading ? <><span>Verifying</span> <LoadingDots /></> : "Verify OTP →"}
               </button>
               <button className="text-gw-400 text-sm hover:text-white transition-colors"
                 onClick={() => handleRegister()}>
