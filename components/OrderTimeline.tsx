@@ -1,4 +1,4 @@
-import { PHASES } from "@/app/api/orders/[id]/status/route";
+import { PHASES } from "@/lib/orderPhases";
 
 type HistoryItem = {
   status:    string;
@@ -30,12 +30,21 @@ const STATUS_ICONS: Record<string, string> = {
 
 export default function OrderTimeline({ currentStatus, history }: Props) {
   const isCompleted = (phaseStatus: string) => {
-    const currentIndex = PHASES.findIndex(p => p.status === currentStatus);
-    const phaseIndex   = PHASES.findIndex(p => p.status === phaseStatus);
-    return phaseIndex <= currentIndex;
-  };
+  // Handle legacy "pending" status
+  const resolvedStatus = currentStatus === "pending"
+    ? "inquiry_submitted"
+    : currentStatus;
+  const currentIndex = PHASES.findIndex(p => p.status === resolvedStatus);
+  const phaseIndex   = PHASES.findIndex(p => p.status === phaseStatus);
+  return phaseIndex <= currentIndex;
+};
 
-  const isCurrent = (phaseStatus: string) => phaseStatus === currentStatus;
+const isCurrent = (phaseStatus: string) => {
+  const resolvedStatus = currentStatus === "pending"
+    ? "inquiry_submitted"
+    : currentStatus;
+  return phaseStatus === resolvedStatus;
+};
 
   const getHistoryNote = (phaseStatus: string) => {
     return history

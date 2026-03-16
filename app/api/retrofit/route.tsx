@@ -47,30 +47,30 @@ export async function POST(req: NextRequest) {
     const userId = (session.user as { id?: string }).id;
 
     // ── Generate order number GW-YYYYMMDD-XXXX ──
-    const today    = new Date();
+    const today = new Date();
     const datePart = today.toISOString().slice(0, 10).replace(/-/g, "");
-    const count    = await RetrofitOrder.countDocuments() + 1;
+    const count = await RetrofitOrder.countDocuments() + 1;
     const orderNumber = `GW-${datePart}-${String(count).padStart(4, "0")}`;
 
     // ── Create order ──
     const order = await RetrofitOrder.create({
       orderNumber,
       customer: userId,
-      status:   "pending",
+      status: "inquiry_submitted",
 
       vehicle: {
-        type:               vehicleType,
+        type: vehicleType,
         brand,
         model,
-        year:               parseInt(year),
+        year: parseInt(year),
         registrationNumber,
         color,
         fuelType,
-        kmDriven:           parseInt(kmDriven),
+        kmDriven: parseInt(kmDriven),
         photos: {
           front: photoFront,
-          back:  photoBack,
-          left:  photoLeft,
+          back: photoBack,
+          left: photoLeft,
           right: photoRight,
         },
       },
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
       },
 
       retrofit: {
-        type:            retrofitType,
+        type: retrofitType,
         motorPower,
         batteryCapacity,
         expectedRange,
@@ -91,24 +91,24 @@ export async function POST(req: NextRequest) {
       },
 
       payment: {
-        totalAmount:  0,
-        tokenAmount:  0,
-        finalAmount:  0,
-        tokenPaid:    false,
-        finalPaid:    false,
+        totalAmount: 0,
+        tokenAmount: 0,
+        finalAmount: 0,
+        tokenPaid: false,
+        finalPaid: false,
       },
 
       history: [{
-        status:    "pending",
-        note:      "Retrofit inquiry submitted by customer.",
+        status: "inquiry_submitted",
+        note: "Retrofit inquiry submitted by customer.",
         updatedAt: new Date(),
       }],
     });
 
     return NextResponse.json({
-      success:  true,
-      message:  "Retrofit inquiry submitted successfully!",
-      orderId:  order._id.toString(),
+      success: true,
+      message: "Retrofit inquiry submitted successfully!",
+      orderId: order._id.toString(),
       orderNumber,
     });
 

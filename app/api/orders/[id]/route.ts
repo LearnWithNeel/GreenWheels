@@ -19,8 +19,7 @@ export async function GET(
     await connectDB();
 
     const order = await RetrofitOrder.findById(params.id)
-      .populate("customer", "name email phone")
-      .populate("dealer",   "name email phone garageName garageAddress");
+  .populate("customer", "name email phone");
 
     if (!order) {
       return NextResponse.json(
