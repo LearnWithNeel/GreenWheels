@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { useState } from "react";
+import NotificationBell from "@/components/NotificationBell";
 
 export default function Navbar() {
   const { data: session } = useSession();
@@ -71,6 +72,7 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-3">
           {session ? (
             <>
+              <NotificationBell />
               <Link href={getDashboardLink()}
                 className="text-sm font-semibold text-gw-400
                            hover:text-white transition-colors">
@@ -149,6 +151,11 @@ export default function Navbar() {
                              text-sm font-medium mb-3"
                   onClick={() => setMenuOpen(false)}>
                   👋 {session.user?.name}
+                </Link>
+                <Link href="/profile"
+                  className="text-sm font-semibold text-gw-400
+             hover:text-white transition-colors">
+                  Profile
                 </Link>
                 <button
                   onClick={() => signOut({ callbackUrl: "/" })}

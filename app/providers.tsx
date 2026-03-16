@@ -7,5 +7,8 @@ export default function Providers({
 }: {
   children: React.ReactNode;
 }) {
-  return <SessionProvider>{children}</SessionProvider>;
+  return <SessionProvider
+    refetchOnWindowFocus={false}
+    refetchInterval={5 * 60}
+  >{children}</SessionProvider>;
 }

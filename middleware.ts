@@ -4,7 +4,7 @@ import { getToken } from "next-auth/jwt";
 
 export async function middleware(request: NextRequest) {
   const token = await getToken({
-    req:    request,
+    req: request,
     secret: process.env.NEXTAUTH_SECRET,
   });
 
@@ -13,16 +13,16 @@ export async function middleware(request: NextRequest) {
 
   // ── Already logged in — redirect away from auth pages ──
   if (token && (pathname === "/login" || pathname === "/register")) {
-    if (role === "admin")  return NextResponse.redirect(new URL("/admin/dashboard",  request.url));
+    if (role === "admin") return NextResponse.redirect(new URL("/admin/dashboard", request.url));
     if (role === "dealer") return NextResponse.redirect(new URL("/dealer/dashboard", request.url));
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   // ── Customer routes — must be logged in as customer ──
   if (pathname.startsWith("/dashboard") ||
-      pathname.startsWith("/orders") ||
-      pathname.startsWith("/profile") ||
-      pathname.startsWith("/retrofit/track")) {
+    pathname.startsWith("/orders") ||
+    pathname.startsWith("/profile") ||
+    pathname.startsWith("/retrofit/track")) {
     if (!token) return NextResponse.redirect(new URL("/login", request.url));
     if (role !== "customer") return NextResponse.redirect(new URL("/", request.url));
   }
