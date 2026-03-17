@@ -1,6 +1,23 @@
+"use client";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
 export default function HomePage() {
+    const { data: session } = useSession();
+    const role = (session?.user as { role?: string })?.role;
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!session) return; // wait for session to load
+        if (role === "dealer") router.push("/dealer/dashboard");
+        if (role === "admin") router.push("/admin/dashboard");
+    }, [role, session]);
+
+    // Only hide page if we KNOW the role is dealer/admin
+    if (session && (role === "dealer" || role === "admin")) return null;
+
     return (
         <main className="page-wrapper">
 

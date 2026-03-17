@@ -19,13 +19,17 @@ export async function middleware(request: NextRequest) {
   }
 
   // ── Customer routes — must be logged in as customer ──
-  if (pathname.startsWith("/dashboard") ||
-    pathname.startsWith("/orders") ||
-    pathname.startsWith("/profile") ||
-    pathname.startsWith("/retrofit/track")) {
-    if (!token) return NextResponse.redirect(new URL("/login", request.url));
-    if (role !== "customer") return NextResponse.redirect(new URL("/", request.url));
-  }
+if (pathname.startsWith("/dashboard") ||
+  pathname.startsWith("/orders") ||
+  pathname.startsWith("/retrofit/track")) {
+  if (!token) return NextResponse.redirect(new URL("/login", request.url));
+  if (role !== "customer") return NextResponse.redirect(new URL("/", request.url));
+}
+
+// ── Profile — accessible by customer AND dealer ──
+if (pathname.startsWith("/profile")) {
+  if (!token) return NextResponse.redirect(new URL("/login", request.url));
+}
 
   // ── Dealer routes — must be logged in as dealer ──
   if (pathname.startsWith("/dealer") && pathname !== "/dealer/register") {

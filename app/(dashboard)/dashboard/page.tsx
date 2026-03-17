@@ -5,15 +5,15 @@ import Link from "next/link";
 import OrderStatusBadge from "@/components/OrderStatusBadge";
 
 type Order = {
-  _id:         string;
+  _id: string;
   orderNumber: string;
-  status:      string;
-  createdAt:   string;
+  status: string;
+  createdAt: string;
   vehicle: {
-    type:  string;
+    type: string;
     brand: string;
     model: string;
-    year:  number;
+    year: number;
   };
   retrofit: {
     type: string;
@@ -21,24 +21,24 @@ type Order = {
 };
 
 const VEHICLE_ICONS: Record<string, string> = {
-  car:  "🚗",
+  car: "🚗",
   bike: "🏍️",
   auto: "🛺",
 };
 
 export default function DashboardPage() {
-  const { data: session }     = useSession();
-  const [orders, setOrders]   = useState<Order[]>([]);
+  const { data: session } = useSession();
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => { loadOrders(); }, []);
 
   async function loadOrders() {
     try {
-      const res  = await fetch("/api/orders/my-orders");
+      const res = await fetch("/api/orders/my-orders");
       const data = await res.json();
       if (data.success) setOrders(data.orders);
-    } catch {}
+    } catch { }
     finally { setLoading(false); }
   }
 
@@ -63,25 +63,25 @@ export default function DashboardPage() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           {[
             {
-              icon:  "📋",
+              icon: "📋",
               label: "Total Orders",
               value: orders.length,
             },
             {
-              icon:  "⚡",
+              icon: "⚡",
               label: "In Progress",
               value: orders.filter(o =>
-                !["delivered","cancelled","verification_failed"]
+                !["delivered", "cancelled", "verification_failed"]
                   .includes(o.status)
               ).length,
             },
             {
-              icon:  "✅",
+              icon: "✅",
               label: "Completed",
               value: orders.filter(o => o.status === "delivered").length,
             },
             {
-              icon:  "🚫",
+              icon: "🚫",
               label: "Cancelled",
               value: orders.filter(o => o.status === "cancelled").length,
             },
@@ -167,9 +167,9 @@ export default function DashboardPage() {
                           {order.orderNumber} · {" "}
                           {new Date(order.createdAt)
                             .toLocaleDateString("en-IN", {
-                              day:   "numeric",
+                              day: "numeric",
                               month: "short",
-                              year:  "numeric",
+                              year: "numeric",
                             })}
                         </div>
                         <OrderStatusBadge status={order.status} />
