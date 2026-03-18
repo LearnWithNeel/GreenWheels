@@ -1,0 +1,295 @@
+export type Product = {
+  id:          string;
+  name:        string;
+  brand:       string;
+  category:    "kit" | "battery" | "motor" | "charger" | "safety" | "accessory";
+  vehicle:     ("car" | "bike" | "auto")[];
+  price:       number;
+  mrp:         number;
+  rating:      number;
+  reviews:     number;
+  inStock:     boolean;
+  araiApproved: boolean;
+  image:       string;
+  desc:        string;
+  specs:       { label: string; value: string }[];
+};
+
+export const DUMMY_PRODUCTS: Product[] = [
+  // ── EV Conversion Kits ──────────────────────────────────────
+  {
+    id: "kit-001",
+    name: "Bosch eAxle 10kW Retrofit Kit",
+    brand: "Bosch",
+    category: "kit",
+    vehicle: ["car"],
+    price: 185000,
+    mrp: 210000,
+    rating: 4.8,
+    reviews: 124,
+    inStock: true,
+    araiApproved: true,
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400",
+    desc: "Complete EV conversion kit for hatchbacks and sedans. Includes motor, controller, and BMS.",
+    specs: [
+      { label: "Motor Power",   value: "10 kW"     },
+      { label: "Max Range",     value: "120 km"    },
+      { label: "Battery",       value: "Not included" },
+      { label: "Warranty",      value: "2 years"   },
+      { label: "ARAI Approval", value: "✅ Certified" },
+    ],
+  },
+  {
+    id: "kit-002",
+    name: "Loop Moto Pro Bike Conversion Kit",
+    brand: "Loop Moto",
+    category: "kit",
+    vehicle: ["bike"],
+    price: 45000,
+    mrp: 55000,
+    rating: 4.6,
+    reviews: 89,
+    inStock: true,
+    araiApproved: true,
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400",
+    desc: "Best in class motorcycle to EV conversion kit. Fits most 100-150cc motorcycles.",
+    specs: [
+      { label: "Motor Power",   value: "3 kW"      },
+      { label: "Max Range",     value: "80 km"     },
+      { label: "Top Speed",     value: "65 km/h"   },
+      { label: "Warranty",      value: "18 months" },
+      { label: "ARAI Approval", value: "✅ Certified" },
+    ],
+  },
+  {
+    id: "kit-003",
+    name: "E-Trio Auto Rickshaw EV Kit",
+    brand: "E-Trio",
+    category: "kit",
+    vehicle: ["auto"],
+    price: 75000,
+    mrp: 90000,
+    rating: 4.5,
+    reviews: 67,
+    inStock: true,
+    araiApproved: true,
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400",
+    desc: "Purpose-built EV kit for three-wheelers. Most popular retrofit in Maharashtra and Gujarat.",
+    specs: [
+      { label: "Motor Power",   value: "5 kW"      },
+      { label: "Max Range",     value: "100 km"    },
+      { label: "Payload",       value: "400 kg"    },
+      { label: "Warranty",      value: "2 years"   },
+      { label: "ARAI Approval", value: "✅ Certified" },
+    ],
+  },
+  {
+    id: "kit-004",
+    name: "Bharat Kits Universal 7kW Car Kit",
+    brand: "Bharat Kits",
+    category: "kit",
+    vehicle: ["car"],
+    price: 145000,
+    mrp: 165000,
+    rating: 4.4,
+    reviews: 43,
+    inStock: true,
+    araiApproved: true,
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400",
+    desc: "Affordable ARAI approved conversion kit for small cars. Made in India.",
+    specs: [
+      { label: "Motor Power",   value: "7 kW"      },
+      { label: "Max Range",     value: "100 km"    },
+      { label: "Compatibility", value: "Maruti, Hyundai, Tata" },
+      { label: "Warranty",      value: "2 years"   },
+      { label: "ARAI Approval", value: "✅ Certified" },
+    ],
+  },
+
+  // ── Batteries ───────────────────────────────────────────────
+  {
+    id: "bat-001",
+    name: "Bosch 30Ah Lithium Pack",
+    brand: "Bosch",
+    category: "battery",
+    vehicle: ["car", "auto"],
+    price: 55000,
+    mrp: 65000,
+    rating: 4.7,
+    reviews: 56,
+    inStock: true,
+    araiApproved: true,
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400",
+    desc: "High density lithium-ion battery pack with built-in BMS and thermal management.",
+    specs: [
+      { label: "Capacity",   value: "30 Ah / 3.6 kWh" },
+      { label: "Voltage",    value: "48V"              },
+      { label: "Cycle Life", value: "2000+ cycles"     },
+      { label: "Warranty",   value: "3 years"          },
+    ],
+  },
+  {
+    id: "bat-002",
+    name: "Bharat Kits 20Ah Bike Battery",
+    brand: "Bharat Kits",
+    category: "battery",
+    vehicle: ["bike"],
+    price: 18000,
+    mrp: 22000,
+    rating: 4.3,
+    reviews: 34,
+    inStock: true,
+    araiApproved: true,
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400",
+    desc: "Lightweight lithium battery designed for motorcycle conversions.",
+    specs: [
+      { label: "Capacity",   value: "20 Ah / 1.5 kWh" },
+      { label: "Voltage",    value: "48V"              },
+      { label: "Weight",     value: "8 kg"             },
+      { label: "Warranty",   value: "2 years"          },
+    ],
+  },
+
+  // ── Motors ──────────────────────────────────────────────────
+  {
+    id: "mot-001",
+    name: "Bosch BLDC Hub Motor 5kW",
+    brand: "Bosch",
+    category: "motor",
+    vehicle: ["car", "auto"],
+    price: 35000,
+    mrp: 42000,
+    rating: 4.9,
+    reviews: 78,
+    inStock: true,
+    araiApproved: true,
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400",
+    desc: "High efficiency brushless DC motor with regenerative braking support.",
+    specs: [
+      { label: "Power",      value: "5 kW"       },
+      { label: "Efficiency", value: "94%"         },
+      { label: "RPM",        value: "3000 RPM"   },
+      { label: "Warranty",   value: "2 years"    },
+    ],
+  },
+  {
+    id: "mot-002",
+    name: "Loop Moto 2kW Mid-Drive Motor",
+    brand: "Loop Moto",
+    category: "motor",
+    vehicle: ["bike"],
+    price: 12000,
+    mrp: 15000,
+    rating: 4.5,
+    reviews: 45,
+    inStock: false,
+    araiApproved: true,
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400",
+    desc: "Compact mid-drive motor perfect for scooter and motorcycle conversions.",
+    specs: [
+      { label: "Power",    value: "2 kW"     },
+      { label: "Torque",   value: "45 Nm"    },
+      { label: "Weight",   value: "4.5 kg"   },
+      { label: "Warranty", value: "1 year"   },
+    ],
+  },
+
+  // ── Chargers ────────────────────────────────────────────────
+  {
+    id: "chg-001",
+    name: "Bosch 3.3kW Home Charger",
+    brand: "Bosch",
+    category: "charger",
+    vehicle: ["car", "bike", "auto"],
+    price: 8500,
+    mrp: 11000,
+    rating: 4.6,
+    reviews: 92,
+    inStock: true,
+    araiApproved: false,
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400",
+    desc: "Smart home charger with mobile app control and overcharge protection.",
+    specs: [
+      { label: "Power",       value: "3.3 kW"    },
+      { label: "Input",       value: "230V AC"   },
+      { label: "Connector",   value: "Type 2"    },
+      { label: "Warranty",    value: "2 years"   },
+    ],
+  },
+  {
+    id: "chg-002",
+    name: "E-Trio Fast Charger 7kW",
+    brand: "E-Trio",
+    category: "charger",
+    vehicle: ["car", "auto"],
+    price: 18000,
+    mrp: 23000,
+    rating: 4.4,
+    reviews: 31,
+    inStock: true,
+    araiApproved: false,
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400",
+    desc: "Commercial grade fast charger suitable for fleet operators and workshops.",
+    specs: [
+      { label: "Power",     value: "7 kW"     },
+      { label: "Input",     value: "415V AC"  },
+      { label: "Connector", value: "CCS2"     },
+      { label: "Warranty",  value: "2 years"  },
+    ],
+  },
+
+  // ── Safety Equipment ─────────────────────────────────────────
+  {
+    id: "saf-001",
+    name: "BMS Pro 16S Protection Module",
+    brand: "Bharat Kits",
+    category: "safety",
+    vehicle: ["car", "bike", "auto"],
+    price: 3500,
+    mrp: 4500,
+    rating: 4.7,
+    reviews: 112,
+    inStock: true,
+    araiApproved: false,
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400",
+    desc: "Battery Management System with overcharge, over-discharge, and short circuit protection.",
+    specs: [
+      { label: "Cells",     value: "16S"        },
+      { label: "Current",   value: "100A max"   },
+      { label: "Features",  value: "OVP, UVP, SCP" },
+      { label: "Warranty",  value: "1 year"     },
+    ],
+  },
+  {
+    id: "saf-002",
+    name: "EV Safety Contactor Kit",
+    brand: "Bosch",
+    category: "safety",
+    vehicle: ["car", "auto"],
+    price: 2800,
+    mrp: 3500,
+    rating: 4.5,
+    reviews: 67,
+    inStock: true,
+    araiApproved: false,
+    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400",
+    desc: "High voltage contactors and fuse kit for safe EV conversion installations.",
+    specs: [
+      { label: "Voltage",  value: "72V max"   },
+      { label: "Current",  value: "200A"      },
+      { label: "Includes", value: "2x contactors, fuse, pre-charge relay" },
+    ],
+  },
+];
+
+export const CATEGORIES = [
+  { key: "all",       label: "All Products",   icon: "🛒" },
+  { key: "kit",       label: "EV Kits",        icon: "⚡" },
+  { key: "battery",   label: "Batteries",      icon: "🔋" },
+  { key: "motor",     label: "Motors",         icon: "🔧" },
+  { key: "charger",   label: "Chargers",       icon: "🔌" },
+  { key: "safety",    label: "Safety",         icon: "🛡️" },
+];
+
+export const BRANDS = ["All Brands", "Bosch", "Loop Moto", "E-Trio", "Bharat Kits"];
+export const VEHICLES = ["All Vehicles", "car", "bike", "auto"];
