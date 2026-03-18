@@ -54,10 +54,10 @@ export default function Footer() {
             </h4>
             <div className="flex flex-col gap-2">
               {[
-                { label: "EV Retrofit",     href: "/retrofit" },
-                { label: "How It Works",    href: "/how-it-works" },
-                { label: "Shop EV Parts",   href: "/shop" },
-                { label: "Franchise",       href: "/franchise" },
+                { label: "EV Retrofit", href: "/retrofit" },
+                { label: "How It Works", href: "/how-it-works" },
+                { label: "Shop EV Parts", href: "/shop" },
+                { label: "Franchise", href: "/franchise" },
               ].map(l => (
                 <Link key={l.label} href={l.href}
                   className="text-gw-500 hover:text-white text-sm
@@ -76,9 +76,9 @@ export default function Footer() {
             <div className="flex flex-col gap-2">
               {[
                 { label: "Register as Dealer", href: "/dealer/register" },
-                { label: "Dealer Login",       href: "/login" },
+                { label: "Dealer Login", href: "/login" },
                 { label: "Legal & Compliance", href: "/legal" },
-                { label: "Franchise Program",  href: "/franchise" },
+                { label: "Franchise Program", href: "/franchise" },
               ].map(l => (
                 <Link key={l.label} href={l.href}
                   className="text-gw-500 hover:text-white text-sm
@@ -96,10 +96,11 @@ export default function Footer() {
             </h4>
             <div className="flex flex-col gap-2">
               {[
-                { label: "Legal Process",      href: "/legal" },
-                { label: "State EV Rules",     href: "/legal" },
-                { label: "Privacy Policy",     href: "/legal" },
-                { label: "Terms of Service",   href: "/legal" },
+                { label: "Legal Process", href: "/legal" },
+                { label: "State EV Rules", href: "/legal" },
+                { label: "Privacy Policy", href: "/legal" },
+                { label: "Terms of Service", href: "/legal" },
+                { label: "Support & Complaints", href: "/support" },
               ].map(l => (
                 <Link key={l.label} href={l.href}
                   className="text-gw-500 hover:text-white text-sm

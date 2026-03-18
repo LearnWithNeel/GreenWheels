@@ -17,18 +17,36 @@ export default function AdminDashboardPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[
-            { icon: "🔧", label: "Dealer Management",
-              desc:  "Review and approve dealer profiles",
-              href:  "/admin/dealers" },
-            { icon: "📋", label: "Order Management",
-              desc:  "Track all retrofit orders",
-              href:  "/admin/orders" },
-            { icon: "👥", label: "Customer Management",
-              desc:  "View all registered customers",
-              href:  "/admin/customers" },
-            { icon: "🏪", label: "Franchise Interests",
-              desc:  "View franchise interest submissions",
-              href:  "/admin/franchise" },
+            {
+              icon: "🔧", label: "Dealer Management",
+              desc: "Review and approve dealer profiles",
+              href: "/admin/dealers"
+            },
+            {
+              icon: "📋", label: "Order Management",
+              desc: "Track all retrofit orders",
+              href: "/admin/orders"
+            },
+            {
+              icon: "👥", label: "Customer Management",
+              desc: "View all registered customers",
+              href: "/admin/customers"
+            },
+            {
+              icon: "🏪", label: "Franchise Interests",
+              desc: "View franchise interest submissions",
+              href: "/admin/franchise"
+            },
+            {
+              icon: "🚨", label: "Complaints",
+              desc: "Review and action escalated complaints",
+              href: "/admin/complaints"
+            },
+            {
+              icon: "👥", label: "Support Team",
+              desc: "Create and manage support agents and leaders",
+              href: "/admin/support-users"
+            },
           ].map(item => (
             <Link key={item.label} href={item.href}
               className="card hover:border-lime-700/50 transition-all

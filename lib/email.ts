@@ -1,8 +1,8 @@
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
-  host:   "smtp.gmail.com",
-  port:   587,
+  host: "smtp.gmail.com",
+  port: 587,
   secure: false,
   auth: {
     user: process.env.GMAIL_USER,
@@ -19,24 +19,28 @@ export async function sendOTPEmail({
   otp,
   purpose,
 }: {
-  to:      string;
-  name:    string;
-  otp:     string;
-  purpose: "register" | "login" | "admin-login";
+  to: string;
+  name: string;
+  otp: string;
+  purpose: "register" | "login" | "reset" | "support_access" | "admin-login"
 }): Promise<boolean> {
   const subject =
-    purpose === "register"
-      ? "Verify your GreenWheels account"
-      : purpose === "admin-login"
-      ? "GreenWheels Admin Login OTP"
-      : "Your GreenWheels login OTP";
+  purpose === "register"
+    ? "Verify your GreenWheels account"
+    : purpose === "admin-login"
+    ? "GreenWheels Admin Login OTP"
+    : purpose === "support_access"
+    ? "GreenWheels Support Access OTP"
+    : "Your GreenWheels login OTP";
 
-  const purposeText =
-    purpose === "register"
-      ? "complete your registration"
-      : purpose === "admin-login"
-      ? "login to the admin dashboard"
-      : "login to your account";
+const purposeText =
+  purpose === "register"
+    ? "complete your registration"
+    : purpose === "admin-login"
+    ? "login to the admin dashboard"
+    : purpose === "support_access"
+    ? "authorize support team profile access"
+    : "login to your account";
 
   try {
     await transporter.sendMail({
