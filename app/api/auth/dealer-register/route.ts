@@ -14,6 +14,7 @@ export async function POST(req: NextRequest) {
             govtLicenseDoc, profileImage,
             garageAddress, specialization,
             experience, certifications,
+            araiKitBrands, erfcCertified, erfcCertNo,
         } = await req.json();
 
         // ── Validate required fields ──
@@ -63,6 +64,9 @@ export async function POST(req: NextRequest) {
             specialization: specialization || [],
             experience: experience || 0,
             certifications: certifications || [],
+            araiKitBrands: araiKitBrands || [],
+            erfcCertified: erfcCertified || false,
+            erfcCertNo: erfcCertNo || "",
             emailVerified: false,
             otpCode: otp,
             otpExpiry: expiry,

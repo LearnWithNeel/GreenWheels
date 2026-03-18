@@ -15,6 +15,17 @@ const STATES = [
   "Delhi", "Jammu & Kashmir", "Ladakh",
 ];
 
+const ARAI_KIT_BRANDS = [
+  "Bosch eAxle",
+  "Loop Moto",
+  "E-Trio",
+  "Bharat Kits",
+  "EV Motoo",
+  "Lectrix",
+  "GoEgo",
+  "Other (Submit for Review)",
+];
+
 const GOVT_ID_TYPES = [
   "GST Certificate",
   "Trade License",
@@ -63,6 +74,9 @@ export default function DealerRegisterPage() {
 
     // Extra
     certifications: [] as string[],
+    araiKitBrands: [] as string[],
+    erfcCertified: false,
+    erfcCertNo: "",
   });
 
   const [restored, setRestored] = useState(false);
@@ -71,7 +85,16 @@ export default function DealerRegisterPage() {
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) setForm(JSON.parse(saved));
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        setForm(prev => ({
+          ...prev,
+          ...parsed,
+          araiKitBrands: parsed.araiKitBrands ?? [],
+          erfcCertified: parsed.erfcCertified ?? false,
+          erfcCertNo: parsed.erfcCertNo ?? "",
+        }));
+      }
     } catch { }
     setRestored(true);
   }, []);
@@ -138,6 +161,12 @@ export default function DealerRegisterPage() {
       if (!form.govtLicenseDoc) {
         setError("Please upload your government license document."); return;
       }
+      if (!form.erfcCertified) {
+        setError("You must confirm ERFC certification to register as a dealer."); return;
+      }
+      if (form.araiKitBrands.length === 0) {
+        setError("Select at least one ARAI approved kit brand you work with."); return;
+      }
 
       const res = await fetch("/api/auth/dealer-register", {
         method: "POST",
@@ -161,6 +190,9 @@ export default function DealerRegisterPage() {
           specialization: form.specialization,
           experience: parseInt(form.experience) || 0,
           certifications: form.certifications,
+          araiKitBrands: form.araiKitBrands,
+          erfcCertified: form.erfcCertified,
+          erfcCertNo: form.erfcCertNo,
         }),
       });
       const data = await res.json();
@@ -545,6 +577,108 @@ export default function DealerRegisterPage() {
                 <label className="label">
                   Certifications (Optional — press Enter to add)
                 </label>
+                {/* ── ERFC Certification ── */}
+                <h3 className="font-bold text-white text-sm border-b
+               border-gw-800 pb-2 mt-2">
+                  🏭 ERFC & ARAI Compliance
+                </h3>
+
+                {/* ERFC Certified checkbox */}
+                <div style={{ border: "1px solid #14532d" }}
+                  className="bg-gw-900/30 rounded-xl px-4 py-4">
+                  <div className="flex items-start gap-3 mb-3">
+                    <button
+                      type="button"
+                      onClick={() => setForm(p => ({ ...p, erfcCertified: !p.erfcCertified }))}
+                      style={{
+                        width: "22px", height: "22px", borderRadius: "6px", flexShrink: 0,
+                        border: form.erfcCertified ? "2px solid #a3e635" : "2px solid #14532d",
+                        background: form.erfcCertified ? "#a3e63520" : "transparent",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        cursor: "pointer", marginTop: "1px",
+                      }}>
+                      {form.erfcCertified && (
+                        <span style={{ color: "#a3e635", fontSize: "13px", fontWeight: 900 }}>✓</span>
+                      )}
+                    </button>
+                    <div>
+                      <p className="text-white font-bold text-sm leading-none mb-1">
+                        I confirm this is a certified ERFC Workshop *
+                      </p>
+                      <p className="text-gw-500 text-xs leading-relaxed">
+                        Electric Retro-fitment Centre (ERFC) certified by MoRTH/State RTO.
+                        Only ERFC workshops can legally perform EV retrofits in India.
+                      </p>
+                      <p className="text-gw-600 text-xs mt-1" style={{ borderTop: "1px solid #14532d" }}>
+                        Not ERFC certified yet?{" "}
+                        <a href="https://vahan.parivahan.gov.in" target="_blank"
+                          className="text-lime-400 hover:text-white transition-colors">
+                          Apply on VAHAN portal →
+                        </a>
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* ERFC Certificate Number */}
+                  {form.erfcCertified && (
+                    <div>
+                      <label className="label">ERFC Certificate Number (Optional)</label>
+                      <input className="input"
+                        placeholder="e.g. ERFC-MH-2024-00123"
+                        value={form.erfcCertNo}
+                        onChange={e => setForm({ ...form, erfcCertNo: e.target.value })} />
+                    </div>
+                  )}
+                </div>
+
+                {/* ARAI Kit Brands */}
+                <div>
+                  <label className="label">
+                    ARAI/ICAT Approved Kit Brands You Use *
+                  </label>
+                  <p className="text-gw-600 text-xs mb-3">
+                    Select all brands whose approved kits you work with.
+                    Only approved kit brands are permitted on GreenWheels.
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {ARAI_KIT_BRANDS.map(brand => (
+                      <button
+                        key={brand}
+                        type="button"
+                        onClick={() => setForm(p => ({
+                          ...p,
+                          araiKitBrands: p.araiKitBrands.includes(brand)
+                            ? p.araiKitBrands.filter(b => b !== brand)
+                            : [...p.araiKitBrands, brand],
+                        }))}
+                        style={{
+                          border: `1px solid ${form.araiKitBrands.includes(brand)
+                            ? "#a3e635" : "#14532d"}`,
+                          background: form.araiKitBrands.includes(brand)
+                            ? "#a3e63510" : "transparent",
+                        }}
+                        className="flex items-center gap-2 px-3 py-2.5 rounded-xl
+                   text-left transition-all">
+                        <span style={{
+                          width: "16px", height: "16px", borderRadius: "4px", flexShrink: 0,
+                          border: form.araiKitBrands.includes(brand)
+                            ? "2px solid #a3e635" : "2px solid #14532d",
+                          background: form.araiKitBrands.includes(brand)
+                            ? "#a3e63520" : "transparent",
+                          display: "flex", alignItems: "center", justifyContent: "center",
+                          fontSize: "10px", color: "#a3e635",
+                        }}>
+                          {form.araiKitBrands.includes(brand) && "✓"}
+                        </span>
+                        <span className={`text-xs font-medium ${form.araiKitBrands.includes(brand)
+                          ? "text-lime-400" : "text-gw-300"
+                          }`}>
+                          {brand}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <input className="input"
                   placeholder="e.g. ARAI Certified, ISO 9001..."
                   onKeyDown={e => {

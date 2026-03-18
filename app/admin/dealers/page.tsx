@@ -2,72 +2,75 @@
 import { useState, useEffect } from "react";
 
 type Dealer = {
-  _id:           string;
-  name:          string;
-  email:         string;
-  phone:         string;
-  garageName:    string;
+  _id: string;
+  name: string;
+  email: string;
+  phone: string;
+  garageName: string;
   garageAddress: {
-    street:  string;
-    city:    string;
-    state:   string;
+    street: string;
+    city: string;
+    state: string;
     pincode: string;
   };
-  specialization:  string[];
-  experience:      number;
-  govtLicenseNo:   string;
-  govtIdType:      string;
-  govtLicenseDoc:  string;
-  profileImage:    string;
-  workshopPhotos:  string[];
-  certifications:  string[];
-  status:          "pending" | "approved" | "rejected";
+  specialization: string[];
+  experience: number;
+  govtLicenseNo: string;
+  govtIdType: string;
+  govtLicenseDoc: string;
+  profileImage: string;
+  workshopPhotos: string[];
+  certifications: string[];
+  araiKitBrands: string[];
+  erfcCertified: boolean;
+  erfcCertNo: string;
+  status: "pending" | "approved" | "rejected";
   rejectionReason: string;
-  rating:          number;
-  totalOrders:     number;
-  createdAt:       string;
+  rating: number;
+  totalOrders: number;
+  createdAt: string;
 };
 
 const STATUS_COLORS = {
-  pending:  "text-yellow-400 border-yellow-700 bg-yellow-900/20",
+  pending: "text-yellow-400 border-yellow-700 bg-yellow-900/20",
   approved: "text-lime-400 border-lime-700 bg-lime-900/20",
   rejected: "text-red-400 border-red-700 bg-red-900/20",
 };
 
 export default function AdminDealersPage() {
-  const [dealers, setDealers]         = useState<Dealer[]>([]);
-  const [loading, setLoading]         = useState(true);
-  const [filter, setFilter]           = useState<"all" | "pending" | "approved" | "rejected">("pending");
-  const [selected, setSelected]       = useState<Dealer | null>(null);
+  const [dealers, setDealers] = useState<Dealer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("pending");
+  const [selected, setSelected] = useState<Dealer | null>(null);
   const [rejectionNote, setRejectionNote] = useState("");
-  const [acting, setActing]           = useState(false);
-  const [error, setError]             = useState("");
+  const [acting, setActing] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => { loadDealers(); }, [filter]);
 
   async function loadDealers() {
     setLoading(true);
     try {
-      const res  = await fetch(`/api/admin/dealers?status=${filter}`);
+      const res = await fetch(`/api/admin/dealers?status=${filter}`);
       const data = await res.json();
       if (data.success) setDealers(data.dealers);
-    } catch {}
+    } catch { }
     finally { setLoading(false); }
   }
 
   async function handleAction(
     dealerId: string,
-    action:   "approve" | "reject"
+    action: "approve" | "reject"
   ) {
     if (action === "reject" && !rejectionNote.trim()) {
       setError("Please provide a rejection reason."); return;
     }
     setActing(true); setError("");
     try {
-      const res  = await fetch("/api/admin/dealers", {
-        method:  "POST",
+      const res = await fetch("/api/admin/dealers", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body:    JSON.stringify({
+        body: JSON.stringify({
           dealerId,
           action,
           rejectionReason: rejectionNote,
@@ -321,6 +324,55 @@ export default function AdminDealersPage() {
                     </a>
                   </div>
                 )}
+
+                {/* ERFC Status */}
+                <div style={{ border: "1px solid #14532d" }}
+                  className="bg-gw-900/30 rounded-xl px-4 py-3">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-gw-500 text-xs">ERFC Certification</span>
+                    <span style={{
+                      border: `1px solid ${selected.erfcCertified ? "#14532d" : "#991b1b"}`,
+                    }}
+                      className={`text-xs px-2 py-0.5 rounded-lg font-bold
+        ${selected.erfcCertified
+                          ? "text-lime-400 bg-lime-900/20"
+                          : "text-red-400 bg-red-900/20"
+                        }`}>
+                      {selected.erfcCertified ? "✅ ERFC Certified" : "❌ Not Certified"}
+                    </span>
+                  </div>
+                  {selected.erfcCertNo && (
+                    <p className="text-white text-xs font-semibold">
+                      Certificate No: {selected.erfcCertNo}
+                    </p>
+                  )}
+                  {!selected.erfcCertified && (
+                    <p className="text-red-400 text-xs mt-1">
+                      ⚠️ This dealer has not confirmed ERFC certification.
+                      Verify before approving.
+                    </p>
+                  )}
+                </div>
+
+                {/* ARAI Kit Brands */}
+                {selected.araiKitBrands?.length > 0 && (
+                  <div>
+                    <span className="text-gw-500 text-xs block mb-2">
+                      ARAI/ICAT Approved Kit Brands
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {selected.araiKitBrands.map(brand => (
+                        <span key={brand}
+                          style={{ border: "1px solid #14532d" }}
+                          className="text-xs text-lime-400 px-2 py-1
+                     rounded-lg bg-gw-900">
+                          ⚡ {brand}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
 
                 {/* Certifications */}
                 {selected.certifications?.length > 0 && (
