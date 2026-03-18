@@ -6,6 +6,8 @@ import {
   verifyDealerOTP,
   sendAdminOTP,
   verifyAdminOTP,
+  sendVendorOTP,
+  verifyVendorOTP,
 } from "@/lib/otp";
 
 export async function POST(req: NextRequest) {
@@ -31,6 +33,13 @@ export async function POST(req: NextRequest) {
         const result = await sendDealerOTP(email, "login");
         return NextResponse.json(result);
       }
+
+      // ── Vendor OTP ──
+      if (role === "vendor") {
+        const result = await sendVendorOTP(email, "login");
+        return NextResponse.json(result);
+      }
+
 
       // ── Customer OTP ──
       const result = await sendCustomerOTP(email, "login");
@@ -61,6 +70,12 @@ export async function POST(req: NextRequest) {
       // ── Dealer OTP verify ──
       if (role === "dealer") {
         const result = await verifyDealerOTP(email, otp);
+        return NextResponse.json(result);
+      }
+
+      // ── Vendor OTP verify ──
+      if (role === "vendor") {
+        const result = await verifyVendorOTP(email, otp);
         return NextResponse.json(result);
       }
 

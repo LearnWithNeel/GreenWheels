@@ -23,6 +23,11 @@ export default function AdminDashboardPage() {
               href: "/admin/dealers"
             },
             {
+              icon: "🏭", label: "Vendor Management",
+              desc: "Review and approve vendor applications",
+              href: "/admin/vendors"
+            },
+            {
               icon: "📋", label: "Order Management",
               desc: "Track all retrofit orders",
               href: "/admin/orders"

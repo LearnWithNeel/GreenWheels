@@ -14,7 +14,7 @@ export async function middleware(request: NextRequest) {
 
   // ── Support Portal — uses separate JWT cookie ──────────────────────────
   if (pathname.startsWith("/support-portal") &&
-      pathname !== "/support-portal/login") {
+    pathname !== "/support-portal/login") {
     const supportToken = request.cookies.get("support-token")?.value;
     if (!supportToken) {
       return NextResponse.redirect(
@@ -33,15 +33,15 @@ export async function middleware(request: NextRequest) {
 
   // ── Already logged in — redirect away from auth pages ──────────────────
   if (token && (pathname === "/login" || pathname === "/register")) {
-    if (role === "admin")  return NextResponse.redirect(new URL("/admin/dashboard",  request.url));
+    if (role === "admin") return NextResponse.redirect(new URL("/admin/dashboard", request.url));
     if (role === "dealer") return NextResponse.redirect(new URL("/dealer/dashboard", request.url));
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   // ── Customer routes ─────────────────────────────────────────────────────
   if (pathname.startsWith("/dashboard") ||
-      pathname.startsWith("/orders")    ||
-      pathname.startsWith("/retrofit/track")) {
+    pathname.startsWith("/orders") ||
+    pathname.startsWith("/retrofit/track")) {
     if (!token) return NextResponse.redirect(new URL("/login", request.url));
     if (role !== "customer") return NextResponse.redirect(new URL("/", request.url));
   }
@@ -53,14 +53,21 @@ export async function middleware(request: NextRequest) {
 
   // ── Dealer routes ───────────────────────────────────────────────────────
   if (pathname.startsWith("/dealer") &&
-      pathname !== "/dealer/register") {
+    pathname !== "/dealer/register") {
     if (!token) return NextResponse.redirect(new URL("/login", request.url));
     if (role !== "dealer") return NextResponse.redirect(new URL("/", request.url));
   }
 
+  // ── Vendor routes ───────────────────────────────────────────────────────────
+  if (pathname.startsWith("/vendor") &&
+    pathname !== "/vendor/register") {
+    if (!token) return NextResponse.redirect(new URL("/login", request.url));
+    if (role !== "vendor") return NextResponse.redirect(new URL("/", request.url));
+  }
+
   // ── Admin routes ────────────────────────────────────────────────────────
   if (pathname.startsWith("/admin") &&
-      pathname !== "/admin/login") {
+    pathname !== "/admin/login") {
     if (!token) return NextResponse.redirect(new URL("/admin/login", request.url));
     if (role !== "admin") return NextResponse.redirect(new URL("/", request.url));
   }
@@ -75,6 +82,7 @@ export const config = {
     "/profile/:path*",
     "/retrofit/track/:path*",
     "/dealer/:path*",
+    "/vendor/:path*",
     "/admin/:path*",
     "/support-portal/:path*",
     "/login",

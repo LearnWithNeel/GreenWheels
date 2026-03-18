@@ -3,6 +3,7 @@ import { sendOTPEmail } from "./email";
 import connectDB from "./db";
 import User from "@/models/User";
 import Dealer from "@/models/Dealer";
+import Vendor from "@/models/Vendor";
 
 // ─── Generate a 6-digit OTP ───────────────────────────────────────────────────
 export function generateOTP(): string {
@@ -231,4 +232,45 @@ export async function verifyAdminOTP(
 
   global._adminOTP = undefined;
   return { success: true, message: "Admin OTP verified." };
+}
+
+// ─── Send OTP to Vendor ───────────────────────────────────────────────────────
+export async function sendVendorOTP(
+  email: string,
+  purpose: "register" | "login"
+): Promise<{ success: boolean; message: string }> {
+  try {
+    await connectDB();
+    const vendor = await Vendor.findOne({ email });
+    if (!vendor) return { success: false, message: "No vendor account found." };
+    const otp    = generateOTP();
+    const expiry = getOTPExpiry();
+    await Vendor.updateOne({ email }, { otpCode: otp, otpExpiry: expiry });
+    const sent = await sendOTPEmail({ to: email, name: vendor.name, otp, purpose });
+    if (!sent) return { success: false, message: "Failed to send OTP." };
+    return { success: true, message: "OTP sent." };
+  } catch (error) {
+    console.error("[GW-OTP] sendVendorOTP error:", error);
+    return { success: false, message: "Something went wrong." };
+  }
+}
+
+// ─── Verify OTP for Vendor ────────────────────────────────────────────────────
+export async function verifyVendorOTP(
+  email: string,
+  otp: string
+): Promise<{ success: boolean; message: string }> {
+  try {
+    await connectDB();
+    const vendor = await Vendor.findOne({ email }).select("+otpCode +otpExpiry");
+    if (!vendor) return { success: false, message: "No vendor account found." };
+    if (!vendor.otpCode || !vendor.otpExpiry) return { success: false, message: "No OTP requested." };
+    if (new Date() > vendor.otpExpiry) return { success: false, message: "OTP expired." };
+    if (vendor.otpCode !== otp) return { success: false, message: "Incorrect OTP." };
+    await Vendor.updateOne({ email }, { otpCode: null, otpExpiry: null, emailVerified: true });
+    return { success: true, message: "OTP verified." };
+  } catch (error) {
+    console.error("[GW-OTP] verifyVendorOTP error:", error);
+    return { success: false, message: "Something went wrong." };
+  }
 }
