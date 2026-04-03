@@ -1,10 +1,10 @@
 import { RetrofitFormData } from "@/app/retrofit/page";
 
 type Props = {
-  form:       RetrofitFormData;
+  form: RetrofitFormData;
   updateForm: (data: Partial<RetrofitFormData>) => void;
-  nextStep:   () => void;
-  prevStep:   () => void;
+  nextStep: () => void;
+  prevStep: () => void;
 };
 
 const FUEL_TYPES = ["Petrol", "Diesel", "CNG", "LPG", "Petrol + CNG"];
@@ -77,7 +77,7 @@ export default function StepB({ form, updateForm, nextStep, prevStep }: Props) {
           <input className="input uppercase" placeholder="e.g. GJ06AB1234"
             value={form.registrationNumber}
             onChange={e => updateForm({
-              registrationNumber: e.target.value.toUpperCase()
+              registrationNumber: e.target.value.toUpperCase().trim()
             })} />
         </div>
 

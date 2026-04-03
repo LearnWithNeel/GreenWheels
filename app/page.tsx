@@ -186,7 +186,8 @@ export default function HomePage() {
             </section>
 
             {/* ── Dealer CTA ── */}
-            <section style={{ borderTop: "1px solid #14532d" }}
+           {!session && (
+             <section style={{ borderTop: "1px solid #14532d" }}
                 className="section text-center py-16">
                 <div className="max-w-2xl mx-auto">
                     <div className="badge-green inline-block mb-4">For Workshop Owners</div>
@@ -209,6 +210,7 @@ export default function HomePage() {
                     </div>
                 </div>
             </section>
+           )}
 
         </main>
     );

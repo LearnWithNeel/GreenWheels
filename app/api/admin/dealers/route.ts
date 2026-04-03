@@ -4,17 +4,19 @@ import connectDB from "@/lib/db";
 import Dealer from "@/models/Dealer";
 import { sendOTPEmail } from "@/lib/email";
 import nodemailer from "nodemailer";
+import Notification from "@/models/Notification";
+import User from "@/models/User";
 
 // ── Helper — send approval/rejection email ─────────────────────────────────
 async function sendStatusEmail(
-  email:  string,
-  name:   string,
+  email: string,
+  name: string,
   status: "approved" | "rejected",
   reason?: string
 ) {
   const transporter = nodemailer.createTransport({
-    host:   "smtp.gmail.com",
-    port:   587,
+    host: "smtp.gmail.com",
+    port: 587,
     secure: false,
     auth: {
       user: process.env.GMAIL_USER,
@@ -81,8 +83,8 @@ async function sendStatusEmail(
     `;
 
   await transporter.sendMail({
-    from:    process.env.GMAIL_USER,
-    to:      email,
+    from: process.env.GMAIL_USER,
+    to: email,
     subject,
     html,
   });
@@ -151,10 +153,27 @@ export async function POST(req: NextRequest) {
     }
 
     if (action === "approve") {
-      dealer.status     = "approved";
+      dealer.status = "approved";
       dealer.approvedAt = new Date();
       dealer.rejectionReason = "";
       await dealer.save();
+
+      // Notify all customers in same city
+      const customersInCity = await User.find({
+        "address.city": { $regex: dealer.garageAddress.city, $options: "i" },
+        role: "customer",
+      });
+
+      for (const customer of customersInCity) {
+        await Notification.create({
+          recipient: customer._id,
+          recipientRole: "customer",
+          type: "new_dealer",
+          title: "New Retrofit Dealer in Your Area! 🔧",
+          message: `${dealer.garageName} is now a verified GreenWheels dealer in ${dealer.garageAddress.city}. Check them out for your EV retrofit!`,
+          read: false,
+        });
+      }
 
       // Send approval email
       try {
@@ -177,10 +196,10 @@ export async function POST(req: NextRequest) {
         );
       }
 
-      dealer.status          = "rejected";
-      dealer.rejectedAt      = new Date();
+      dealer.status = "rejected";
+      dealer.rejectedAt = new Date();
       dealer.rejectionReason = rejectionReason;
-      dealer.rejectionNote   = rejectionReason;
+      dealer.rejectionNote = rejectionReason;
       await dealer.save();
 
       // Send rejection email

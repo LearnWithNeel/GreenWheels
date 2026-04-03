@@ -1,5 +1,6 @@
 "use client";
 import { useState, useMemo } from "react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import {
   DUMMY_PRODUCTS, CATEGORIES, BRANDS, VEHICLES,
@@ -9,10 +10,10 @@ import {
 const SHOP_MODE = process.env.NEXT_PUBLIC_SHOP_MODE || "dummy";
 
 const SORT_OPTIONS = [
-  { key: "popular",   label: "Most Popular"   },
+  { key: "popular", label: "Most Popular" },
   { key: "price_asc", label: "Price: Low → High" },
-  { key: "price_desc",label: "Price: High → Low" },
-  { key: "rating",    label: "Top Rated"      },
+  { key: "price_desc", label: "Price: High → Low" },
+  { key: "rating", label: "Top Rated" },
 ];
 
 function formatPrice(p: number) {
@@ -52,8 +53,10 @@ function ProductCard({ product }: { product: Product }) {
 
         {discount > 0 && (
           <div className="absolute top-3 right-3"
-            style={{ background: "#a3e635", borderRadius: "8px",
-                     padding: "2px 8px" }}>
+            style={{
+              background: "#a3e635", borderRadius: "8px",
+              padding: "2px 8px"
+            }}>
             <span className="text-xs font-black text-gw-950">
               -{discount}%
             </span>
@@ -129,29 +132,32 @@ function ProductCard({ product }: { product: Product }) {
 
 export default function ShopPage() {
 
+  const { data: session } = useSession();
+  const role = (session?.user as { role?: string })?.role;
+
   const [category, setCategory] = useState("all");
-  const [brand, setBrand]       = useState("All Brands");
-  const [vehicle, setVehicle]   = useState("All Vehicles");
-  const [sort, setSort]         = useState("popular");
-  const [search, setSearch]     = useState("");
+  const [brand, setBrand] = useState("All Brands");
+  const [vehicle, setVehicle] = useState("All Vehicles");
+  const [sort, setSort] = useState("popular");
+  const [search, setSearch] = useState("");
 
   const filtered = useMemo(() => {
     let p = [...DUMMY_PRODUCTS];
 
-    if (search)               p = p.filter(x =>
+    if (search) p = p.filter(x =>
       x.name.toLowerCase().includes(search.toLowerCase()) ||
       x.brand.toLowerCase().includes(search.toLowerCase())
     );
-    if (category !== "all")   p = p.filter(x => x.category === category);
-    if (brand !== "All Brands")   p = p.filter(x => x.brand === brand);
+    if (category !== "all") p = p.filter(x => x.category === category);
+    if (brand !== "All Brands") p = p.filter(x => x.brand === brand);
     if (vehicle !== "All Vehicles") p = p.filter(x =>
       x.vehicle.includes(vehicle as "car" | "bike" | "auto")
     );
 
-    if (sort === "price_asc")  p.sort((a, b) => a.price - b.price);
+    if (sort === "price_asc") p.sort((a, b) => a.price - b.price);
     if (sort === "price_desc") p.sort((a, b) => b.price - a.price);
-    if (sort === "rating")     p.sort((a, b) => b.rating - a.rating);
-    if (sort === "popular")    p.sort((a, b) => b.reviews - a.reviews);
+    if (sort === "rating") p.sort((a, b) => b.rating - a.rating);
+    if (sort === "popular") p.sort((a, b) => b.reviews - a.reviews);
 
     return p;
   }, [category, brand, vehicle, sort, search]);
@@ -261,9 +267,9 @@ export default function ShopPage() {
             {VEHICLES.map(v => (
               <option key={v} value={v} className="capitalize">
                 {v === "All Vehicles" ? v
-                 : v === "car" ? "🚗 Car"
-                 : v === "bike" ? "🏍️ Bike"
-                 : "🛺 Auto"}
+                  : v === "car" ? "🚗 Car"
+                    : v === "bike" ? "🏍️ Bike"
+                      : "🛺 Auto"}
               </option>
             ))}
           </select>
@@ -308,21 +314,23 @@ export default function ShopPage() {
         )}
 
         {/* Vendor CTA */}
-        <div style={{ border: "1px solid #14532d" }}
-          className="bg-gw-900/20 rounded-2xl p-6 mt-12 text-center">
-          <h2 className="font-black text-white text-xl mb-2">
-            Are you an EV parts supplier? 🏭
-          </h2>
-          <p className="text-gw-400 text-sm mb-4 max-w-xl mx-auto">
-            Register as a verified vendor and sell your ARAI approved
-            products to thousands of retrofit customers and dealers
-            across India.
-          </p>
-          <Link href="/vendor/register"
-            className="btn-primary text-sm py-3 px-6">
-            Become a Vendor →
-          </Link>
-        </div>
+        {(!session || role === "vendor") && (
+          <div style={{ border: "1px solid #14532d" }}
+            className="bg-gw-900/20 rounded-2xl p-6 mt-12 text-center">
+            <h2 className="font-black text-white text-xl mb-2">
+              Are you an EV parts supplier? 🏭
+            </h2>
+            <p className="text-gw-400 text-sm mb-4 max-w-xl mx-auto">
+              Register as a verified vendor and sell your ARAI approved
+              products to thousands of retrofit customers and dealers
+              across India.
+            </p>
+            <Link href="/vendor/register"
+              className="btn-primary text-sm py-3 px-6">
+              Become a Vendor →
+            </Link>
+          </div>
+        )}
 
       </section>
     </main>

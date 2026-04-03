@@ -7,11 +7,33 @@ export default function DealerDashboardPage() {
   const { data: session } = useSession();
   const name = session?.user?.name?.split(" ")[0] || "there";
 
+  const [orders, setOrders] = useState<{
+    new: number; active: number; completed: number;
+  }>({ new: 0, active: 0, completed: 0 });
+
+  useEffect(() => {
+    async function loadStats() {
+      try {
+        const [avail, active, done] = await Promise.all([
+          fetch("/api/dealer/orders?type=available").then(r => r.json()),
+          fetch("/api/dealer/orders?type=active").then(r => r.json()),
+          fetch("/api/dealer/orders?type=completed").then(r => r.json()),
+        ]);
+        setOrders({
+          new:       avail.orders?.length  || 0,
+          active:    active.orders?.length || 0,
+          completed: done.orders?.length   || 0,
+        });
+      } catch {}
+    }
+    loadStats();
+  }, []);
+
   return (
     <main className="page-wrapper">
       <section className="section max-w-5xl mx-auto">
 
-        {/* ── Header ── */}
+        {/* Header */}
         <div className="mb-8">
           <div className="badge-green inline-block mb-3">
             Dealer Dashboard
@@ -24,15 +46,15 @@ export default function DealerDashboardPage() {
           </p>
         </div>
 
-        {/* ── Stats ── */}
+        {/* Stats */}
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
           {[
-            { icon: "📋", label: "New Orders", value: "0", desc: "Pending acceptance" },
-            { icon: "🔧", label: "Active Jobs", value: "0", desc: "In progress" },
-            { icon: "✅", label: "Completed", value: "0", desc: "Total jobs done" },
-            { icon: "⭐", label: "Rating", value: "—", desc: "Avg customer rating" },
-            { icon: "💰", label: "Total Earnings", value: "₹0", desc: "Lifetime earnings" },
-            { icon: "🛡️", label: "Profile Status", value: "Pending", desc: "Admin approval" },
+            { icon: "📋", label: "New Orders",     value: orders.new,       desc: "Pending acceptance"  },
+            { icon: "🔧", label: "Active Jobs",    value: orders.active,    desc: "In progress"         },
+            { icon: "✅", label: "Completed",      value: orders.completed, desc: "Total jobs done"     },
+            { icon: "⭐", label: "Rating",         value: "—",              desc: "Avg customer rating" },
+            { icon: "💰", label: "Total Earnings", value: "₹0",             desc: "Lifetime earnings"   },
+            { icon: "🛡️", label: "Profile Status", value: "Pending",        desc: "Admin approval"      },
           ].map(s => (
             <div key={s.label} className="card text-center">
               <div className="text-3xl mb-2">{s.icon}</div>
@@ -47,29 +69,30 @@ export default function DealerDashboardPage() {
           ))}
         </div>
 
-        {/* ── Quick Actions ── */}
+        {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
           {[
             {
               icon: "👤", label: "Complete Profile",
               desc: "Get admin approved to start receiving orders",
-              href: "/dealer/profile", primary: true
+              href: "/dealer/profile", primary: true,
             },
             {
               icon: "📋", label: "View Orders",
               desc: "Check new and active retrofit orders",
-              href: "/dealer/orders", primary: false
+              href: "/dealer/orders", primary: false,
             },
             {
               icon: "🛒", label: "Shop EV Parts",
               desc: "Buy ARAI approved kits and accessories",
-              href: "/shop", primary: false
+              href: "/shop", primary: false,
             },
           ].map(a => (
             <Link key={a.label} href={a.href}
               style={{ border: "1px solid #14532d" }}
-              className="bg-gw-900/30 rounded-xl p-5 hover:border-lime-700/50
-                         transition-all group block">
+              className="bg-gw-900/30 rounded-xl p-5
+                         hover:border-lime-700/50 transition-all
+                         group block">
               <div className="text-3xl mb-3">{a.icon}</div>
               <h3 className={`font-black text-lg mb-1 transition-colors
                 ${a.primary
@@ -82,7 +105,7 @@ export default function DealerDashboardPage() {
           ))}
         </div>
 
-        {/* ── RTO & Compliance Guide ── */}
+        {/* RTO & Compliance Guide */}
         <div style={{ border: "1px solid #14532d" }}
           className="bg-gw-900/20 rounded-2xl p-6 mb-6">
           <h2 className="font-black text-white text-xl mb-4">
@@ -95,13 +118,13 @@ export default function DealerDashboardPage() {
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {[
-              { done: true, text: "Use only ARAI/ICAT approved EV conversion kits" },
-              { done: true, text: "Verify vehicle fitness before accepting order" },
+              { done: true,  text: "Use only ARAI/ICAT approved EV conversion kits"  },
+              { done: true,  text: "Verify vehicle fitness before accepting order"    },
               { done: false, text: "File Form 22C Part-I with RTO before starting work" },
-              { done: false, text: "Get RTO permission within 7 working days" },
-              { done: false, text: "Complete retrofit at certified ERFC workshop" },
-              { done: false, text: "Pass post-retrofit quality inspection" },
-              { done: false, text: "File Form 22C Part-II after retrofit completion" },
+              { done: false, text: "Get RTO permission within 7 working days"         },
+              { done: false, text: "Complete retrofit at certified ERFC workshop"     },
+              { done: false, text: "Pass post-retrofit quality inspection"            },
+              { done: false, text: "File Form 22C Part-II after retrofit completion"  },
               { done: false, text: "Ensure RC book update to show Electric fuel type" },
             ].map((item, i) => (
               <div key={i}
@@ -135,7 +158,7 @@ export default function DealerDashboardPage() {
           </div>
         </div>
 
-        {/* ── ARAI Approved Kits Info ── */}
+        {/* ARAI Approved Kits */}
         <div style={{ border: "1px solid #14532d" }}
           className="bg-gw-900/20 rounded-2xl p-6 mb-6">
           <h2 className="font-black text-white text-xl mb-4">
@@ -148,14 +171,14 @@ export default function DealerDashboardPage() {
           </p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { name: "Bosch eAxle", type: "Car / SUV", approved: true },
-              { name: "Loop Moto", type: "Bike / Scooter", approved: true },
-              { name: "E-Trio", type: "Car / Auto", approved: true },
-              { name: "Bharat Kits", type: "All Vehicles", approved: true },
-              { name: "EV Motoo", type: "Bike / Scooter", approved: true },
-              { name: "Lectrix", type: "Scooter", approved: true },
-              { name: "GoEgo", type: "Auto-Rickshaw", approved: true },
-              { name: "Other Brands", type: "Submit for review", approved: false },
+              { name: "Bosch eAxle",  type: "Car / SUV",         approved: true  },
+              { name: "Loop Moto",    type: "Bike / Scooter",    approved: true  },
+              { name: "E-Trio",       type: "Car / Auto",        approved: true  },
+              { name: "Bharat Kits",  type: "All Vehicles",      approved: true  },
+              { name: "EV Motoo",     type: "Bike / Scooter",    approved: true  },
+              { name: "Lectrix",      type: "Scooter",           approved: true  },
+              { name: "GoEgo",        type: "Auto-Rickshaw",     approved: true  },
+              { name: "Other Brands", type: "Submit for review",  approved: false },
             ].map(kit => (
               <div key={kit.name}
                 style={{
@@ -184,10 +207,13 @@ export default function DealerDashboardPage() {
             🏭 What is ERFC Certification?
           </h3>
           <p className="text-gw-400 text-sm leading-relaxed mb-4">
-            An <span className="text-white font-bold">Electric Retro-fitment Centre (ERFC)</span> is
-            a workshop certified by MoRTH and State RTO to legally perform
-            EV conversions in India. Without ERFC certification your workshop
-            cannot legally retrofit vehicles.
+            An{" "}
+            <span className="text-white font-bold">
+              Electric Retro-fitment Centre (ERFC)
+            </span>{" "}
+            is a workshop certified by MoRTH and State RTO to legally
+            perform EV conversions in India. Without ERFC certification
+            your workshop cannot legally retrofit vehicles.
           </p>
           <div className="flex flex-col gap-2 mb-4">
             {[
@@ -198,18 +224,21 @@ export default function DealerDashboardPage() {
               "Only ERFC certified dealers can register on GreenWheels",
             ].map((item, i) => (
               <div key={i} className="flex items-start gap-2">
-                <span className="text-lime-400 shrink-0 text-xs mt-0.5">✓</span>
+                <span className="text-lime-400 shrink-0 text-xs mt-0.5">
+                  ✓
+                </span>
                 <span className="text-gw-400 text-xs">{item}</span>
               </div>
             ))}
           </div>
           <a href="https://vahan.parivahan.gov.in" target="_blank"
             className="text-lime-400 text-sm font-bold hover:text-white
-               transition-colors">
+                       transition-colors">
             Apply for ERFC Certification on VAHAN Portal →
           </a>
         </div>
-        {/* ── Important Links ── */}
+
+        {/* Important Documents + Responsibilities */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div style={{ border: "1px solid #14532d" }}
             className="bg-gw-900/20 rounded-2xl p-5">
@@ -218,27 +247,14 @@ export default function DealerDashboardPage() {
             </h3>
             <div className="flex flex-col gap-2">
               {[
-                {
-                  label: "Form 22C — RTO Retrofit Application",
-                  href: "/legal"
-                },
-                {
-                  label: "MoRTH GSR 167(E) — EV Retrofit Rules",
-                  href: "/legal"
-                },
-                {
-                  label: "ARAI Kit Approval Guidelines",
-                  href: "/legal"
-                },
-                {
-                  label: "GreenWheels Dealer Agreement",
-                  href: "/legal"
-                },
+                { label: "Form 22C — RTO Retrofit Application",  href: "/legal" },
+                { label: "MoRTH GSR 167(E) — EV Retrofit Rules", href: "/legal" },
+                { label: "ARAI Kit Approval Guidelines",          href: "/legal" },
+                { label: "GreenWheels Dealer Agreement",          href: "/legal" },
               ].map(doc => (
                 <Link key={doc.label} href={doc.href}
-                  className="text-gw-400 hover:text-lime-400
-                             text-sm transition-colors flex
-                             items-center gap-2">
+                  className="text-gw-400 hover:text-lime-400 text-sm
+                             transition-colors flex items-center gap-2">
                   <span className="text-gw-700">→</span>
                   {doc.label}
                 </Link>
@@ -270,7 +286,7 @@ export default function DealerDashboardPage() {
           </div>
         </div>
 
-        {/* ── Franchise subtle ── */}
+        {/* Franchise subtle */}
         <div style={{ border: "1px solid #14532d" }}
           className="rounded-xl px-5 py-4 flex items-center
                      justify-between gap-4 opacity-50

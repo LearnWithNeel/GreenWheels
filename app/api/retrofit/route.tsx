@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import connectDB from "@/lib/db";
 import RetrofitOrder from "@/models/RetrofitOrder";
+import Notification from "@/models/Notification";
 
 export async function POST(req: NextRequest) {
   try {
@@ -27,6 +28,44 @@ export async function POST(req: NextRequest) {
       batteryCapacity, expectedRange, chargingType,
       specialRequests,
     } = body;
+
+    const blockedStatuses = [
+      "inquiry_submitted",
+      "dealer_accepted",
+      "verification_scheduled",
+      "verification_ongoing",
+      "verification_passed",
+      "token_paid",
+      "pickup_scheduled",
+      "vehicle_picked_up",
+      "retrofit_in_progress",
+      "quality_check_done",
+      "rto_filed",
+      "delivered",
+    ];
+
+    // ── Registration number uniqueness check ──────────────────────────────────
+    const regNumber = (registrationNumber || "").toUpperCase().trim();
+
+    const existingOrder = await RetrofitOrder.findOne({
+      "vehicle.registrationNumber": regNumber,
+      status: { $in: blockedStatuses },
+    });
+
+    if (existingOrder) {
+      const isCompleted = existingOrder.status === "delivered";
+      return NextResponse.json(
+        {
+          success: false,
+          message: isCompleted
+            ? `Vehicle ${regNumber} has already been converted to electric (Order ${existingOrder.orderNumber}). A vehicle cannot be retrofitted twice as per RTO regulations.`
+            : `Vehicle ${regNumber} already has an active retrofit order in progress (Order ${existingOrder.orderNumber}). Please complete or cancel the existing order before placing a new one.`,
+        },
+        { status: 409 }
+      );
+    }
+
+
 
     // ── Validate required fields ──
     if (
@@ -103,6 +142,17 @@ export async function POST(req: NextRequest) {
         note: "Retrofit inquiry submitted by customer.",
         updatedAt: new Date(),
       }],
+    });
+
+    // Notify customer — order placed
+    await Notification.create({
+      recipient: userId,
+      recipientRole: "customer",
+      type: "order_placed",
+      title: "Order Placed Successfully! 📋",
+      message: `Your retrofit inquiry ${orderNumber} has been submitted. Our verified dealers have been notified. You will hear back shortly.`,
+      orderId: order._id,
+      read: false,
     });
 
     return NextResponse.json({
