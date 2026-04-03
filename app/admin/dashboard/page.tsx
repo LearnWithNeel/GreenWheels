@@ -4,38 +4,38 @@ import Link from "next/link";
 import OrderStatusBadge from "@/components/OrderStatusBadge";
 
 type Stats = {
-  customers:  { total: number };
-  dealers:    { total: number; approved: number; pending: number };
-  vendors:    { total: number; pending: number };
-  orders:     { total: number; active: number; completed: number; cancelled: number };
+  customers: { total: number };
+  dealers: { total: number; approved: number; pending: number };
+  vendors: { total: number; pending: number };
+  orders: { total: number; active: number; completed: number; cancelled: number };
   complaints: { total: number; open: number; escalated: number };
 };
 
 type RecentOrder = {
-  _id:         string;
+  _id: string;
   orderNumber: string;
-  status:      string;
-  createdAt:   string;
-  customer:    { name: string; email: string };
-  vehicle:     { brand: string; model: string; type: string };
+  status: string;
+  createdAt: string;
+  customer: { name: string; email: string };
+  vehicle: { brand: string; model: string; type: string };
 };
 
 export default function AdminDashboardPage() {
-  const [stats, setStats]               = useState<Stats | null>(null);
+  const [stats, setStats] = useState<Stats | null>(null);
   const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
-  const [loading, setLoading]           = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => { loadStats(); }, []);
 
   async function loadStats() {
     try {
-      const res  = await fetch("/api/admin/stats");
+      const res = await fetch("/api/admin/stats");
       const data = await res.json();
       if (data.success) {
         setStats(data.stats);
         setRecentOrders(data.recentOrders);
       }
-    } catch {}
+    } catch { }
     finally { setLoading(false); }
   }
 
@@ -64,50 +64,50 @@ export default function AdminDashboardPage() {
             {stats && (stats.dealers.pending > 0 ||
               stats.vendors.pending > 0 ||
               stats.complaints.escalated > 0) && (
-              <div className="flex flex-col gap-2 mb-6">
-                {stats.dealers.pending > 0 && (
-                  <Link href="/admin/dealers"
-                    style={{ border: "1px solid #d97706" }}
-                    className="bg-yellow-900/20 rounded-xl px-4 py-3
+                <div className="flex flex-col gap-2 mb-6">
+                  {stats.dealers.pending > 0 && (
+                    <Link href="/admin/dealers"
+                      style={{ border: "1px solid #d97706" }}
+                      className="bg-yellow-900/20 rounded-xl px-4 py-3
                                flex items-center justify-between">
-                    <span className="text-yellow-400 text-sm font-bold">
-                      ⚠️ {stats.dealers.pending} dealer{stats.dealers.pending > 1 ? "s" : ""} pending approval
-                    </span>
-                    <span className="text-yellow-400 text-xs">Review →</span>
-                  </Link>
-                )}
-                {stats.vendors.pending > 0 && (
-                  <Link href="/admin/vendors"
-                    style={{ border: "1px solid #d97706" }}
-                    className="bg-yellow-900/20 rounded-xl px-4 py-3
+                      <span className="text-yellow-400 text-sm font-bold">
+                        ⚠️ {stats.dealers.pending} dealer{stats.dealers.pending > 1 ? "s" : ""} pending approval
+                      </span>
+                      <span className="text-yellow-400 text-xs">Review →</span>
+                    </Link>
+                  )}
+                  {stats.vendors.pending > 0 && (
+                    <Link href="/admin/vendors"
+                      style={{ border: "1px solid #d97706" }}
+                      className="bg-yellow-900/20 rounded-xl px-4 py-3
                                flex items-center justify-between">
-                    <span className="text-yellow-400 text-sm font-bold">
-                      ⚠️ {stats.vendors.pending} vendor{stats.vendors.pending > 1 ? "s" : ""} pending approval
-                    </span>
-                    <span className="text-yellow-400 text-xs">Review →</span>
-                  </Link>
-                )}
-                {stats.complaints.escalated > 0 && (
-                  <Link href="/admin/complaints"
-                    style={{ border: "1px solid #991b1b" }}
-                    className="bg-red-900/20 rounded-xl px-4 py-3
+                      <span className="text-yellow-400 text-sm font-bold">
+                        ⚠️ {stats.vendors.pending} vendor{stats.vendors.pending > 1 ? "s" : ""} pending approval
+                      </span>
+                      <span className="text-yellow-400 text-xs">Review →</span>
+                    </Link>
+                  )}
+                  {stats.complaints.escalated > 0 && (
+                    <Link href="/admin/complaints"
+                      style={{ border: "1px solid #991b1b" }}
+                      className="bg-red-900/20 rounded-xl px-4 py-3
                                flex items-center justify-between">
-                    <span className="text-red-400 text-sm font-bold">
-                      🚨 {stats.complaints.escalated} complaint{stats.complaints.escalated > 1 ? "s" : ""} escalated — action required
-                    </span>
-                    <span className="text-red-400 text-xs">Action →</span>
-                  </Link>
-                )}
-              </div>
-            )}
+                      <span className="text-red-400 text-sm font-bold">
+                        🚨 {stats.complaints.escalated} complaint{stats.complaints.escalated > 1 ? "s" : ""} escalated — action required
+                      </span>
+                      <span className="text-red-400 text-xs">Action →</span>
+                    </Link>
+                  )}
+                </div>
+              )}
 
             {/* Main stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               {[
-                { icon: "👥", label: "Customers",    value: stats?.customers.total || 0,  color: "text-white",   href: "/admin/customers" },
-                { icon: "🔧", label: "Dealers",      value: stats?.dealers.approved || 0, color: "text-lime-400", href: "/admin/dealers"  },
-                { icon: "🏭", label: "Vendors",      value: stats?.vendors.total || 0,    color: "text-white",   href: "/admin/vendors"  },
-                { icon: "📋", label: "Total Orders", value: stats?.orders.total || 0,     color: "text-white",   href: "/admin/orders"   },
+                { icon: "👥", label: "Customers", value: stats?.customers.total || 0, color: "text-white", href: "/admin/customers" },
+                { icon: "🔧", label: "Dealers", value: stats?.dealers.approved || 0, color: "text-lime-400", href: "/admin/dealers" },
+                { icon: "🏭", label: "Vendors", value: stats?.vendors.total || 0, color: "text-white", href: "/admin/vendors" },
+                { icon: "📋", label: "Total Orders", value: stats?.orders.total || 0, color: "text-white", href: "/admin/orders" },
               ].map(s => (
                 <Link key={s.label} href={s.href}
                   className="card text-center hover:border-lime-700/50
@@ -125,10 +125,10 @@ export default function AdminDashboardPage() {
             {/* Order stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               {[
-                { icon: "⚡", label: "Active Orders",    value: stats?.orders.active    || 0, color: "text-yellow-400" },
-                { icon: "✅", label: "Completed",         value: stats?.orders.completed || 0, color: "text-lime-400"   },
-                { icon: "🚨", label: "Open Complaints",   value: stats?.complaints.open  || 0, color: "text-orange-400" },
-                { icon: "🔴", label: "Escalated",         value: stats?.complaints.escalated || 0, color: "text-red-400" },
+                { icon: "⚡", label: "Active Orders", value: stats?.orders.active || 0, color: "text-yellow-400" },
+                { icon: "✅", label: "Completed", value: stats?.orders.completed || 0, color: "text-lime-400" },
+                { icon: "🚨", label: "Open Complaints", value: stats?.complaints.open || 0, color: "text-orange-400" },
+                { icon: "🔴", label: "Escalated", value: stats?.complaints.escalated || 0, color: "text-red-400" },
               ].map(s => (
                 <div key={s.label} className="card text-center">
                   <div className="text-2xl mb-2">{s.icon}</div>
@@ -143,12 +143,13 @@ export default function AdminDashboardPage() {
             {/* Quick links */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
               {[
-                { icon: "🔧", label: "Dealer Management",  desc: "Approve/reject dealers",        href: "/admin/dealers"       },
-                { icon: "🏭", label: "Vendor Management",  desc: "Approve/reject vendors",        href: "/admin/vendors"       },
-                { icon: "📋", label: "All Orders",         desc: "View all retrofit orders",      href: "/admin/orders"        },
-                { icon: "👥", label: "Customers",          desc: "View all customers",            href: "/admin/customers"     },
-                { icon: "🚨", label: "Complaints",         desc: "Handle escalated complaints",   href: "/admin/complaints"    },
-                { icon: "👤", label: "Support Team",       desc: "Manage support agents",         href: "/admin/support-users" },
+                { icon: "🔧", label: "Dealer Management", desc: "Approve/reject dealers", href: "/admin/dealers" },
+                { icon: "🏭", label: "Vendor Management", desc: "Approve/reject vendors", href: "/admin/vendors" },
+                { icon: "📋", label: "All Orders", desc: "View all retrofit orders", href: "/admin/orders" },
+                { icon: "👥", label: "Customers", desc: "View all customers", href: "/admin/customers" },
+                { icon: "🚨", label: "Complaints", desc: "Handle escalated complaints", href: "/admin/complaints" },
+                { icon: "👤", label: "Support Team", desc: "Manage support agents", href: "/admin/support-users" },
+                { icon: "📦", label: "Product Approvals", desc: "Review vendor product listings", href: "/admin/products" },
               ].map(item => (
                 <Link key={item.label} href={item.href}
                   className="card hover:border-lime-700/50 transition-all
@@ -189,7 +190,7 @@ export default function AdminDashboardPage() {
                           <span className="font-bold text-white text-sm">
                             {order.orderNumber}
                           </span>
-                          <OrderStatusBadge status={order.status}/>
+                          <OrderStatusBadge status={order.status} />
                         </div>
                         <p className="text-gw-500 text-xs">
                           {order.customer?.name} ·{" "}
