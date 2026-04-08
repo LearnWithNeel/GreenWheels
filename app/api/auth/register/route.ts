@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import User from "@/models/User";
 import { generateOTP, getOTPExpiry } from "@/lib/otp";
-import { sendOTPEmail } from "@/lib/email";
+import { sendWelcomeEmail, sendOTPEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
@@ -35,27 +35,30 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Generate OTP ──
-    const otp    = generateOTP();
+    const otp = generateOTP();
     const expiry = getOTPExpiry();
 
     // ── Create user — emailVerified: false until OTP confirmed ──
     await User.create({
-      name:          name.trim(),
-      email:         email.toLowerCase().trim(),
+      name: name.trim(),
+      email: email.toLowerCase().trim(),
       password,
-      role:          "customer",
+      role: "customer",
       emailVerified: false,
-      otpCode:       otp,
-      otpExpiry:     expiry,
+      otpCode: otp,
+      otpExpiry: expiry,
     });
 
     // ── Send OTP email ──
     const sent = await sendOTPEmail({
-      to:      email,
-      name:    name.trim(),
+      to: email,
+      name: name.trim(),
       otp,
       purpose: "register",
     });
+
+    // After user.save():
+    await sendWelcomeEmail({ to: email, name, role: "customer" });
 
     if (!sent) {
       // Delete the user we just created so they can retry

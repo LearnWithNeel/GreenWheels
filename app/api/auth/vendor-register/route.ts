@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Vendor from "@/models/Vendor";
-import { sendOTPEmail } from "@/lib/email";
+import { sendWelcomeEmail, sendOTPEmail } from "@/lib/email";
 import { generateOTP, getOTPExpiry } from "@/lib/otp";
 
 export async function POST(req: NextRequest) {
@@ -20,9 +20,9 @@ export async function POST(req: NextRequest) {
     } = await req.json();
 
     if (!name || !email || !password || !phone ||
-        !businessName || !businessType || !gstNumber ||
-        !gstDocument || !address?.street || !address?.city ||
-        !address?.state || !address?.pincode) {
+      !businessName || !businessType || !gstNumber ||
+      !gstDocument || !address?.street || !address?.city ||
+      !address?.state || !address?.pincode) {
       return NextResponse.json(
         { success: false, message: "All required fields must be filled." },
         { status: 400 }
@@ -44,35 +44,39 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const otp    = generateOTP();
+    const otp = generateOTP();
     const expiry = getOTPExpiry();
 
     await Vendor.create({
       name, email, password, phone,
       businessName, businessType,
       gstNumber, gstDocument,
-      tradeLicense:    tradeLicense    || "",
+      tradeLicense: tradeLicense || "",
       tradeLicenseDoc: tradeLicenseDoc || "",
-      araiApproval:    araiApproval    || "",
+      araiApproval: araiApproval || "",
       araiApprovalDoc: araiApprovalDoc || "",
       productCategories: productCategories || [],
-      bankAccountName:   bankAccountName   || "",
+      bankAccountName: bankAccountName || "",
       bankAccountNumber: bankAccountNumber || "",
-      bankIfsc:          bankIfsc          || "",
+      bankIfsc: bankIfsc || "",
       address,
       agreedToTerms,
       emailVerified: false,
-      otpCode:       otp,
-      otpExpiry:     expiry,
-      status:        "pending",
+      otpCode: otp,
+      otpExpiry: expiry,
+      status: "pending",
     });
 
+    // After vendor created:
+    await sendWelcomeEmail({ to: email, name, role: "vendor" });
+    
     await sendOTPEmail({
-      to:      email,
+      to: email,
       name,
       otp,
       purpose: "register",
     });
+
 
     return NextResponse.json({
       success: true,

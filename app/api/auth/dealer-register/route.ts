@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import connectDB from "@/lib/db";
 import Dealer from "@/models/Dealer";
-import { sendOTPEmail } from "@/lib/email";
+import { sendWelcomeEmail, sendOTPEmail  } from "@/lib/email";
 import { generateOTP, getOTPExpiry } from "@/lib/otp";
 
 export async function POST(req: NextRequest) {
@@ -72,6 +72,9 @@ export async function POST(req: NextRequest) {
             otpExpiry: expiry,
             status: "pending",
         });
+
+        // After dealer created:
+        await sendWelcomeEmail({ to: email, name, role: "dealer" });
 
         // ── Send OTP email ──
         await sendOTPEmail({

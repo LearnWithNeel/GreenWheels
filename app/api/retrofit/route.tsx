@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import connectDB from "@/lib/db";
 import RetrofitOrder from "@/models/RetrofitOrder";
 import Notification from "@/models/Notification";
+import { sendOrderStatusEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
@@ -169,4 +170,13 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
+
+  // After order created:
+  await sendOrderStatusEmail({
+    to: user.email,
+    name: user.name,
+    orderNumber: order.orderNumber,
+    status: "inquiry_submitted",
+    orderId: order._id.toString(),
+  });
 }

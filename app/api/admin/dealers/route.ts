@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import connectDB from "@/lib/db";
 import Dealer from "@/models/Dealer";
-import { sendOTPEmail } from "@/lib/email";
+import { sendDealerStatusEmail } from "@/lib/email";
 import nodemailer from "nodemailer";
 import Notification from "@/models/Notification";
 import User from "@/models/User";
@@ -82,6 +82,8 @@ async function sendStatusEmail(
       </div>
     `;
 
+
+
   await transporter.sendMail({
     from: process.env.GMAIL_USER,
     to: email,
@@ -89,6 +91,7 @@ async function sendStatusEmail(
     html,
   });
 }
+
 
 // ── GET — List dealers by status ───────────────────────────────────────────
 export async function GET(req: NextRequest) {
@@ -175,6 +178,9 @@ export async function POST(req: NextRequest) {
         });
       }
 
+      // After approve:
+      await sendDealerStatusEmail({ to: dealer.email, name: dealer.name, status: "approved" });
+
       // Send approval email
       try {
         await sendStatusEmail(dealer.email, dealer.name, "approved");
@@ -201,6 +207,9 @@ export async function POST(req: NextRequest) {
       dealer.rejectionReason = rejectionReason;
       dealer.rejectionNote = rejectionReason;
       await dealer.save();
+
+      // After reject:
+      await sendDealerStatusEmail({ to: dealer.email, name: dealer.name, status: "rejected", reason: rejectionReason });
 
       // Send rejection email
       try {

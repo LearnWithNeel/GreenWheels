@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    let orders;
+    let orders: Awaited<ReturnType<typeof RetrofitOrder.find>> = [];
     // let orders: any[] = [];
 
     if (type === "available") {
