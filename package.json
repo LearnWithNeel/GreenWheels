@@ -1,5 +1,6 @@
 {
   "name": "greenwheels",
+  "homepage": "https://learnwithneel.github.io/GreenWheels",
   "version": "1.0.0",
   "description": "GreenWheels — EV Retrofit SaaS Platform",
   "private": true,
